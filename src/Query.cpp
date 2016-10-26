@@ -2,7 +2,7 @@
 
 namespace mDNSResolver {
   Query::Query(std::string name) {
-    this->assemblePacket(name);
+    this->name = name;
   }
 
   Query::~Query() {}
@@ -10,57 +10,54 @@ namespace mDNSResolver {
   // If we pass in a UDP proxy, we can dynamically allocate the
   // memory without fee of fragmentation, and don't risk losing 
   // the reference if this object disappears
-  unsigned char &Query::getPacket() {
-    return *this->buffer;
+  void Query::sendPacket(UDP *socket) {
+    int bufferLength = this->name.length() + 18;
+    unsigned char buffer[bufferLength];
+    assemblePacket(buffer, bufferLength);
+    socket->write(buffer, bufferLength);
   }
 
-  unsigned int Query::length() {
-    return this->packetLength;
-  }
-
-  void Query::assemblePacket(std::string &name) {
-    for(int i = 0; i < MDNS_MAX_NAME_LEN + 18; i++) {
-      this->buffer[i] = '\0';
+  void Query::assemblePacket(unsigned char *buffer, int bufferLength) {
+    for(int i = 0; i < bufferLength; i++) {
+      buffer[i] = 0;
     }
 
-    this->buffer[4] = 0;
-    this->buffer[5] = 1;
+    buffer[4] = 0;
+    buffer[5] = 1;
 
     int bufferIndex = 12;
-
-    bufferIndex = buildDNSName(name, bufferIndex);
+    bufferIndex = buildDNSName(buffer, bufferIndex);
     
     int qtype = 0x01;
     int qclass = 0x01;
-    this->buffer[bufferIndex++] = '\0';
-    this->buffer[bufferIndex++] = (qtype & 0xFF00) >> 8;
-    this->buffer[bufferIndex++] = qtype & 0xFF;
-    this->buffer[bufferIndex++] = (qclass & 0xFF00) >> 8;
-    this->buffer[bufferIndex++] = qclass & 0xFF;
 
-    this->packetLength = bufferIndex;
+    buffer[bufferIndex++] = '\0';
+    buffer[bufferIndex++] = (qtype & 0xFF00) >> 8;
+    buffer[bufferIndex++] = qtype & 0xFF;
+    buffer[bufferIndex++] = (qclass & 0xFF00) >> 8;
+    buffer[bufferIndex++] = qclass & 0xFF;
   }
 
-  int Query::buildDNSName(std::string &name, unsigned int bufferIndex) {
+  int Query::buildDNSName(unsigned char *buffer, unsigned int bufferIndex) {
     int wordstart = 0, wordend = 0;
     
     do {
-      if(name[wordend] == '.' || name[wordend] == '\0') {
+      if(this->name[wordend] == '.' || this->name[wordend] == '\0') {
         const int wordlen = wordend - wordstart;
         buffer[bufferIndex++] = (unsigned char)wordlen;
 
         for(int i = wordstart; i < wordend; i++) {
-          buffer[bufferIndex++] = name[i];
+          buffer[bufferIndex++] = this->name[i];
         }
         
-        if(name[wordend] == '.') {
+        if(this->name[wordend] == '.') {
           wordend++;
         }
         wordstart = wordend;
       }
       
       wordend++;
-    } while(name[wordstart] != '\0');
+    } while(this->name[wordstart] != '\0');
     
     return bufferIndex;
   }

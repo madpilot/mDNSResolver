@@ -5,10 +5,7 @@
 TEST_CASE("Assemble Packet", "[Query]" ) {
   std::string name = std::string("test.local");
   mDNSResolver::Query q(name);
-
-  SECTION("packet size") {
-    REQUIRE(q.length() == 18 + name.length());
-  }
+  UDP udp;
 
   SECTION("packet output") {
     unsigned char expected[] = {
@@ -35,11 +32,10 @@ TEST_CASE("Assemble Packet", "[Query]" ) {
       0x01, // QClass
     };
 
-    unsigned char actual[q.length()];
-    memcpy(actual, &q.getPacket(), q.length());
+    q.sendPacket(&udp);
 
-    for(int i = 0; i < q.length(); i++) {
-      REQUIRE(actual[i] == expected[i]);
+    for(int i = 0; i < udp.length(); i++) {
+      REQUIRE(udp.buffer[i] == expected[i]);
     }
   }
 }

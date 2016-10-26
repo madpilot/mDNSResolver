@@ -1,18 +1,17 @@
 #include "Constants.h"
 #include <string>
+#include "../mocks/UDP.h"
 
 namespace mDNSResolver {
   class Query {
   public:
     Query(std::string name);
     ~Query();
-    unsigned char &getPacket();
-    unsigned int length();
+    void sendPacket(UDP *socket);
 
   private:
-    unsigned char buffer[MDNS_MAX_NAME_LEN + 18];
-    void assemblePacket(std::string &name);
-    unsigned int packetLength;
-    int buildDNSName(std::string &name, unsigned int bufferIndex);
+    std::string name;
+    void assemblePacket(unsigned char *buffer, int bufferLength);
+    int buildDNSName(unsigned char *buffer, unsigned int bufferIndex);
   };
 };
