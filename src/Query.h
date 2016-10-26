@@ -10,7 +10,7 @@ namespace mDNSResolver {
     unsigned int length();
 
   private:
-    unsigned char buffer[MDNS_MAX_NAME_LEN + 19];
+    unsigned char buffer[MDNS_MAX_NAME_LEN + 18];
     void assemblePacket(std::string &name);
     unsigned int packetLength;
     int buildDNSName(std::string &name, unsigned int bufferIndex);

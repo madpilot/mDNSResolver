@@ -1,12 +1,15 @@
 #include "Query.h"
 
-namespace mDNSResolver { 
+namespace mDNSResolver {
   Query::Query(std::string name) {
     this->assemblePacket(name);
   }
 
   Query::~Query() {}
 
+  // If we pass in a UDP proxy, we can dynamically allocate the
+  // memory without fee of fragmentation, and don't risk losing 
+  // the reference if this object disappears
   unsigned char &Query::getPacket() {
     return *this->buffer;
   }
