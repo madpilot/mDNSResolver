@@ -22,8 +22,7 @@ namespace mDNSResolver {
       buffer[i] = 0;
     }
 
-    buffer[4] = 0;
-    buffer[5] = 1;
+    buffer[5] = 0x01;
 
     int bufferIndex = 12;
     bufferIndex = buildDNSName(buffer, bufferIndex);
