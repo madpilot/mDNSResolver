@@ -1,0 +1,1 @@
+#define MDNS_MAX_NAME_LEN 255
