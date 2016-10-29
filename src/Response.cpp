@@ -17,7 +17,9 @@ namespace mDNSResolver {
   }
 
   void Response::decrementTTL() {
-
+    if(this->ttl > 0) {
+      this->ttl--;
+    }
   }
 
   bool Response::operator==(const Response& response) {

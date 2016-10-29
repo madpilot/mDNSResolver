@@ -3,7 +3,7 @@
 #include "../src/Response.h"
 
 using namespace mDNSResolver;
-SCENARIO("Cache can have responses inserted in to it") {
+SCENARIO("DNS responses are stored in a Cache") {
   Cache cache;
 
   GIVEN("An empty cache") {
@@ -45,6 +45,16 @@ SCENARIO("Cache can have responses inserted in to it") {
 
       THEN("the inserted item should appear in the cache") {
         REQUIRE(cache.search(r3) != -1);
+      }
+    }
+
+    WHEN("inserting another item with the same name") {
+      Response r2a("response2.local", 7);
+      cache.insert(r2a);
+
+      THEN("the existing item should be replaced") {
+        REQUIRE(cache.length() == 2);
+        REQUIRE(cache[1].ttl == 7);
       }
     }
   }
@@ -101,6 +111,53 @@ SCENARIO("Cache can have responses inserted in to it") {
         REQUIRE(cache.search(r2) == -1);
         REQUIRE(cache.search(r3) != -1);
         REQUIRE(cache.search(r4) != -1);
+      }
+    }
+
+    WHEN("inserting another item with the same name") {
+      Response r2a("response2.local", 7);
+      cache.insert(r2a);
+
+      THEN("the existing item should be replaced") {
+        REQUIRE(cache[1].ttl == 7);
+      }
+
+      THEN("The oldest item should not be removed") {
+        REQUIRE(cache.search(r3) != -1);
+      }
+    }
+  }
+}
+
+SCENARIO("Expiring items in the cache") {
+  Cache cache;
+
+  GIVEN("A non empty cache") {
+    Response r1("response1.local", 10);
+    Response r2("response2.local", 2);
+    cache.insert(r1);
+    cache.insert(r2);
+
+    WHEN("expire is called all of the response ttls should be reduced") {
+      cache[0].ttl = 10;
+      cache[1].ttl = 2;
+
+      cache.expire();
+      REQUIRE(cache[0].ttl == 9);
+      REQUIRE(cache[1].ttl == 1);
+    }
+
+    GIVEN("an item with a TTL of 1") {
+      Response r3("response3.local", 1);
+      cache.insert(r3);
+
+      cache[0].ttl = 10;
+      cache[1].ttl = 2;
+
+      WHEN("expire is called the item should be removed") {
+        cache.expire();
+        REQUIRE(cache.length() == 2);
+        REQUIRE(cache.search(r3) == -1);
       }
     }
   }

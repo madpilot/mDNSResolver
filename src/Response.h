@@ -11,7 +11,7 @@ namespace mDNSResolver {
     Response(std::string name, unsigned long ttl);
     ~Response();
     void decrementTTL();
-    unsigned long ttl;
+    long ttl;
     std::string name;
     bool operator==(const Response& response);
   };
