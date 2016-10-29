@@ -1,6 +1,6 @@
 #include "catch.h"
-#include "../src/Cache.h"
-#include "../src/Response.h"
+#include "Cache.h"
+#include "Response.h"
 
 using namespace mDNSResolver;
 SCENARIO("DNS responses are stored in a Cache") {

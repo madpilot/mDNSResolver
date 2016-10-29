@@ -1,5 +1,5 @@
 #include "catch.h"
-#include "../src/Response.h"
+#include "Response.h"
 
 using namespace mDNSResolver;
 SCENARIO("Decrementing the TTL") {

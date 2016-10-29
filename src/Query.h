@@ -2,8 +2,9 @@
 #define MDNS_RESOLVER_QUERY_H
 
 #include "Constants.h"
+
 #include <string>
-#include "../mocks/UDP.h"
+#include <UDP.h>
 
 #define MDNS_RESOLVER_MAX_CACHE 4
 

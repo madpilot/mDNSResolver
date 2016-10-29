@@ -2,6 +2,7 @@
 #define MDNS_RESOLVER_RESPONSE_H
 
 #include <string>
+#include <IPAddress.h>
 
 namespace mDNSResolver {
   class Response {
@@ -16,6 +17,7 @@ namespace mDNSResolver {
     std::string name;
     long ttl;
     bool resolved;
+    IPAddress ipAddress;
 
     bool operator==(const Response& response);
   };
