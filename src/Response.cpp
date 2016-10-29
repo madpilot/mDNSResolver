@@ -1,19 +1,23 @@
 #include "Response.h"
 
 namespace mDNSResolver {
-  Response::Response() {}
+  Response::Response() {
+    this->resolved = false;
+  }
 
   Response::Response(std::string name) {
     this->name = name;
+    this->ttl = 0;
+    this->resolved = false;
   }
 
   Response::Response(std::string name, unsigned long ttl) {
     this->name = name;
     this->ttl = ttl;
+    this->resolved = false;
   }
 
   Response::~Response() {
-
   }
 
   void Response::decrementTTL() {
