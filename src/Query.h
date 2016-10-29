@@ -1,6 +1,11 @@
+#ifndef MDNS_RESOLVER_QUERY_H
+#define MDNS_RESOLVER_QUERY_H
+
 #include "Constants.h"
 #include <string>
 #include "../mocks/UDP.h"
+
+#define MDNS_RESOLVER_MAX_CACHE 4
 
 namespace mDNSResolver {
   class Query {
@@ -15,3 +20,5 @@ namespace mDNSResolver {
     int buildDNSName(unsigned char *buffer, unsigned int bufferIndex);
   };
 };
+
+#endif

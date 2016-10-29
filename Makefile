@@ -1,4 +1,4 @@
 tests:
-	g++ test/QueryTest.cpp src/Query.cpp mocks/Udp.cpp -o test/runner
+	g++ test/Runner.cpp test/QueryTest.cpp src/Query.cpp test/CacheTest.cpp src/Cache.cpp src/Response.cpp mocks/Udp.cpp -o test/runner
 	test/runner
 	rm test/runner
