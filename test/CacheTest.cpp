@@ -57,6 +57,31 @@ SCENARIO("DNS responses are stored in a Cache") {
         REQUIRE(cache[1].ttl == 7);
       }
     }
+
+    WHEN("an item is removed") {
+      cache.remove(r2);
+
+      THEN("the length should decrease") {
+        REQUIRE(cache.length() == 1);
+      }
+
+      THEN("removes references to the item") {
+        REQUIRE(cache.search(r1) != -1);
+        REQUIRE(cache.search(r2) == -1);
+      }
+    }
+
+    GIVEN("an item not in the cache") {
+      WHEN("attempting to remove") {
+        Response r3("response3.local", 1);
+        cache.remove(r3);
+
+        THEN("no items are removed") {
+          REQUIRE(cache.search(r1) != -1);
+          REQUIRE(cache.search(r2) != -1);
+        }
+      }
+    }
   }
 
   GIVEN("A full cache") {
@@ -97,20 +122,6 @@ SCENARIO("DNS responses are stored in a Cache") {
         REQUIRE(cache.search(r3) == -1);
         REQUIRE(cache.search(r4) != -1);
         REQUIRE(cache.search(r5) != -1);
-      }
-    }
-
-    WHEN("removing an item") {
-      cache.remove(r2);
-      THEN("the length should decrease") {
-        REQUIRE(cache.length() == MDNS_RESOLVER_MAX_CACHE - 1);
-      }
-
-      THEN("removes references to the item") {
-        REQUIRE(cache.search(r1) != -1);
-        REQUIRE(cache.search(r2) == -1);
-        REQUIRE(cache.search(r3) != -1);
-        REQUIRE(cache.search(r4) != -1);
       }
     }
 
