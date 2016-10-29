@@ -3,6 +3,7 @@
 namespace mDNSResolver {
   Response::Response() {
     this->resolved = false;
+    this->ttl = 0;
   }
 
   Response::Response(std::string name) {

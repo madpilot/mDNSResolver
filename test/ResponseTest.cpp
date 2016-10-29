@@ -28,5 +28,4 @@ SCENARIO("Decrementing the TTL") {
       }
     }
   }
-
 }
