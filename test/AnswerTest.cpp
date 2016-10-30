@@ -7,8 +7,8 @@
 #include <UDP.h>
 
 using namespace mDNSResolver;
-SCENARIO("Packet received") {
-  GIVEN("has questions") {
+SCENARIO("UDP packet is received.") {
+  GIVEN("the packet has questions") {
     UDP Udp = UDP::loadFromFile("fixtures/question.bin");
     unsigned len = Udp.parsePacket();
     unsigned char *packet = (unsigned char *)malloc(sizeof(unsigned char) * len);
@@ -30,7 +30,7 @@ SCENARIO("Packet received") {
     }
   }
 
-  GIVEN("a question that attempts to overflow the pointer") {
+  GIVEN("the packet is malicious and attempting to overflow the pointer") {
     UDP Udp = UDP::loadFromFile("fixtures/overflow_question.bin");
     unsigned len = Udp.parsePacket();
     unsigned char *packet = (unsigned char *)malloc(sizeof(unsigned char) * len);
