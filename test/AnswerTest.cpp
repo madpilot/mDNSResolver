@@ -29,4 +29,22 @@ SCENARIO("Packet received") {
       }
     }
   }
+
+  GIVEN("a question that attempts to overflow the pointer") {
+    UDP Udp = UDP::loadFromFile("fixtures/overflow_question.bin");
+    unsigned len = Udp.parsePacket();
+    unsigned char *packet = (unsigned char *)malloc(sizeof(unsigned char) * len);
+
+    Udp.read(packet, len);
+
+    WHEN("parsing") {
+      unsigned int offset = 0;
+      int result = Answer::skipQuestions(packet, len, &offset);
+
+      THEN("an error should be returned") {
+        REQUIRE(result == E_MDNS_PACKET_ERROR);
+      }
+    }
+  }
 }
+

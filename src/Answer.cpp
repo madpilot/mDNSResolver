@@ -87,16 +87,24 @@ namespace mDNSResolver {
         } else {
           unsigned int labelSize = (unsigned int)buffer[*offset];
 
-          if(labelSize > 0x3cf) {
+          if(labelSize > 0x3f) {
             return E_MDNS_PACKET_ERROR;
           }
 
           (*offset) += 1; // Increment to move to the next byte
           (*offset) += labelSize;
+
+          if(*offset > len) {
+            return E_MDNS_PACKET_ERROR;
+          }
         }
       }
 
       (*offset) += 5; // 2 bytes for the qtypes and 2 bytes qclass + plus one to land us on the next bit
+    }
+
+    if(*offset > len + 1) {
+      return E_MDNS_PACKET_ERROR;
     }
 
     return E_MDNS_OK;
