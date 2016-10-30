@@ -1,5 +1,6 @@
 #include "catch.h"
-#include "../src/Query.h"
+#include "Query.h"
+#include <UDP.h>
 
 TEST_CASE("Assemble Packet", "[Query]" ) {
   std::string name = std::string("test.local");
@@ -33,8 +34,8 @@ TEST_CASE("Assemble Packet", "[Query]" ) {
 
     q.sendPacket(&udp);
 
-    for(int i = 0; i < udp.length(); i++) {
-      REQUIRE(udp.buffer[i] == expected[i]);
+    for(int i = 0; i < udp.writeLength(); i++) {
+      REQUIRE(udp.writeBuffer[i] == expected[i]);
     }
   }
 }
