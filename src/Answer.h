@@ -20,7 +20,7 @@ namespace mDNSResolver {
   private:
 #endif
     static MDNS_RESULT skipQuestions(unsigned char* buffer, unsigned int len, unsigned int* offset);
-
+    static MDNS_RESULT parseName(char** name, const char* mapped, unsigned int len);
   private:
     unsigned int type;
     unsigned int aclass;

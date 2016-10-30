@@ -7,6 +7,7 @@
 #define E_MDNS_PACKET_ERROR               0x23
 #define E_MDNS_PARSING_ERROR              0x24
 #define E_MDNS_TRUNCATED                  0x25
+#define E_MDNS_INVALID_LABEL_LENGTH       0x26
 
 #define MDNS_A_RECORD                     0x01
 #define MDNS_CNAME_RECORD                 0x05

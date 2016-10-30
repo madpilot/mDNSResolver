@@ -31,7 +31,7 @@ namespace mDNSResolver {
     if(questionResult != E_MDNS_OK) {
       return questionResult;
     }
-    return E_MDNS_OK;
+
     //for(int i = 0; i < answerCount; i++) {
       //Answer answer();
 
@@ -70,6 +70,32 @@ namespace mDNSResolver {
         //return E_MDNS_PARSING_ERROR;
       //}
     //}
+  }
+
+  // name needs to have already been allocated
+  MDNS_RESULT Answer::parseName(char** name, const char* mapped, unsigned int len) {
+    unsigned int namePointer = 0;
+    unsigned int mapPointer = 0;
+
+    while(mapPointer < len) {
+      int labelLength = mapped[mapPointer++];
+
+      if(namePointer + labelLength > len - 1) {
+        return E_MDNS_INVALID_LABEL_LENGTH;
+      }
+
+      if(namePointer != 0) {
+        (*name)[namePointer++] = '.';
+      }
+
+      for(int i = 0; i < labelLength; i++) {
+        (*name)[namePointer++] = mapped[mapPointer++];
+      }
+    }
+
+    (*name)[len - 1] = '\0';
+
+    return E_MDNS_OK;
   }
 
   // Work out how many bytes are dedicated to questions. Since we aren't answering questions, they can be skipped
