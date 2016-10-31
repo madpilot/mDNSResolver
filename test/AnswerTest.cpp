@@ -56,12 +56,14 @@ SCENARIO("Parsing a name") {
     };
 
     WHEN("parsing") {
+      char* result = (char *)malloc(sizeof(char) * 10);
+      Answer::parseName(&result, name, 11);
+
       THEN("converts the name to a FQDN") {
-        char* result = (char *)malloc(sizeof(char) * 10);
-        Answer::parseName(&result, name, 11);
         REQUIRE(strcmp(result, "test.local") == 0);
-        free(result);
       }
+
+      free(result);
     }
   }
 
@@ -75,12 +77,14 @@ SCENARIO("Parsing a name") {
     };
 
     WHEN("parsing") {
+      char* result = (char *)malloc(sizeof(char) * 20);
+      Answer::parseName(&result, name, 21);
+
       THEN("converts the name to a FQDN") {
-        char* result = (char *)malloc(sizeof(char) * 20);
-        Answer::parseName(&result, name, 21);
         REQUIRE(strcmp(result, "this.is.a.test.local") == 0);
-        free(result);
       }
+
+      free(result);
     }
   }
 
@@ -91,12 +95,14 @@ SCENARIO("Parsing a name") {
     };
 
     WHEN("parsing") {
+      char* result = (char *)malloc(sizeof(char) * 10);
+      int r = Answer::parseName(&result, name, 11);
+
       THEN("returns an E_MDNS_INVALID_LABEL_LENGTH") {
-        char* result = (char *)malloc(sizeof(char) * 10);
-        int r = Answer::parseName(&result, name, 11);
         REQUIRE(r == E_MDNS_INVALID_LABEL_LENGTH);
-        free(result);
       }
+
+      free(result);
     }
   }
 
@@ -107,13 +113,42 @@ SCENARIO("Parsing a name") {
     };
 
     WHEN("parsing") {
+      char* result = (char *)malloc(sizeof(char) * 10);
+      int r = Answer::parseName(&result, name, 11);
+
       THEN("returns an E_MDNS_INVALID_LABEL_LENGTH") {
-        char* result = (char *)malloc(sizeof(char) * 10);
-        int r = Answer::parseName(&result, name, 11);
         REQUIRE(r == E_MDNS_INVALID_LABEL_LENGTH);
-        free(result);
       }
+
+      free(result);
     }
   }
+}
 
+SCENARIO("assembling a name") {
+  GIVEN("a full name") {
+    unsigned char buffer[] = {
+      0x04, 't', 'e', 's', 't',
+      0x07, 'l', 'o', 'c', 'a', 'l', 0x00,
+      0x05, 't', 'e', 's', 't', '2',
+      0xc0, 0x05, // Points at local
+      0xc0, 0x00, // Points at test.local
+      0xc0, 0x0c, // Points at test2.local
+    };
+
+    WHEN("assembling") {
+      char* result = (char *)malloc(sizeof(char) * MDNS_MAX_NAME_LEN);
+      int len = Answer::assembleName(buffer, 24, 0, &result);
+
+      THEN("the returned value should be the same as the source length") {
+        REQUIRE(len == 12);
+      }
+
+      THEN("the name returns the name unchanged") {
+        REQUIRE(memcmp(result, buffer, 12) == 0);
+      }
+
+      free(result);
+    }
+  }
 }

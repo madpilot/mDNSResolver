@@ -19,6 +19,8 @@ namespace mDNSResolver {
 #ifndef TEST
   private:
 #endif
+    static int assembleName(unsigned char *buffer, unsigned int len, unsigned int *offset, char **name, unsigned int maxlen);
+    static int assembleName(unsigned char *buffer, unsigned int len, unsigned int *offset, char **name);
     static MDNS_RESULT skipQuestions(unsigned char* buffer, unsigned int len, unsigned int* offset);
     static MDNS_RESULT parseName(char** name, const char* mapped, unsigned int len);
   private:

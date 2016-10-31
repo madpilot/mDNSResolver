@@ -1,4 +1,5 @@
 #include "Answer.h"
+#include <stdlib.h>
 
 namespace mDNSResolver {
   Answer::Answer() {}
@@ -72,7 +73,10 @@ namespace mDNSResolver {
     //}
   }
 
-  // name needs to have already been allocated
+  // Converts a encoded DNS name into a FQDN.
+  // name: pointer to char array where the result will be stored. Needs to have already been allocated. It's allocated length should be len - 1
+  // mapped: The encoded DNS name
+  // len: Length of mapped
   MDNS_RESULT Answer::parseName(char** name, const char* mapped, unsigned int len) {
     unsigned int namePointer = 0;
     unsigned int mapPointer = 0;
@@ -98,7 +102,44 @@ namespace mDNSResolver {
     return E_MDNS_OK;
   }
 
+  int Answer::assembleName(unsigned char *buffer, unsigned int len, unsigned int *offset, char **name, unsigned int maxlen) {
+    unsigned int index = 0;
+
+    while(buffer[*offset] != '\0' && index < maxlen) {
+      if((buffer[*offset] & 0xc0) == 0xc0) {
+        char *pointer;
+        unsigned int pointerOffset = ((buffer[(*offset)++] & 0x3f) << 8) + buffer[*offset];
+        if(pointerOffset > len) {
+          // Points to somewhere beyond the packet
+          return -1 * E_MDNS_POINTER_OVERFLOW;
+        }
+        assembleName(buffer, len, &pointerOffset, &pointer);
+
+        unsigned int pointerLen = strlen(pointer);
+        memcpy(*name + index, pointer, pointerLen);
+
+        index += pointerLen;
+        free(pointer);
+
+        break;
+      } else {
+        (*name)[index++] = buffer[(*offset)++];
+      }
+    }
+
+    (*name)[index++] = '\0';
+    (*offset)++;
+    return index;
+  }
+
+  int Answer::assembleName(unsigned char *buffer, unsigned int len, unsigned int *offset, char **name) {
+    return assembleName(buffer, len, offset, name, MDNS_MAX_NAME_LEN);
+  }
+
   // Work out how many bytes are dedicated to questions. Since we aren't answering questions, they can be skipped
+  // buffer: The mDNS packet we are parsing
+  // len: Length of the packet
+  // offset: the byte we are up to in the parsing process
   MDNS_RESULT Answer::skipQuestions(unsigned char* buffer, unsigned int len, unsigned int* offset) {
     unsigned int questionCount = (buffer[4] << 8) + buffer[5];
 
