@@ -177,6 +177,10 @@ SCENARIO("assembling a name") {
         REQUIRE(memcmp(result, expected, 13) == 0);
       }
 
+      THEN("offset should be incremented") {
+        REQUIRE(offset == 20);
+      }
+
       free(result);
     }
 
@@ -198,6 +202,10 @@ SCENARIO("assembling a name") {
         REQUIRE(memcmp(result, expected, 13) == 0);
       }
 
+      THEN("offset should increment by 2") {
+        REQUIRE(offset == 24);
+      }
+
       free(result);
     }
 
@@ -213,6 +221,33 @@ SCENARIO("assembling a name") {
       free(result);
     }
   }
+
+  GIVEN("a packet with an A record") {
+    UDP Udp = UDP::loadFromFile("fixtures/cname_answer.bin");
+    unsigned len = Udp.parsePacket();
+    unsigned char *packet = (unsigned char *)malloc(sizeof(unsigned char) * len);
+
+    Udp.read(packet, len);
+
+    WHEN("parsing") {
+      unsigned int offset = 68;
+      Answer answer;
+      int result = Answer::parseAnswer(packet, len, &offset, &answer);
+
+      THEN("the answer is parsed") {
+        REQUIRE(result == E_MDNS_OK);
+      }
+
+      THEN("the data should equal the ip address") {
+        unsigned char expected[] = {
+          0xc0, 0xa8, 0x01, 0x02
+        };
+
+        REQUIRE(memcmp(expected, answer.data, 4) == 0);
+      }
+    }
+  }
+
 
   GIVEN("a packet with a CNAME") {
     UDP Udp = UDP::loadFromFile("fixtures/cname_answer.bin");

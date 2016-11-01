@@ -29,7 +29,7 @@ namespace mDNSResolver {
 
     answer->name = (char *)malloc(sizeof(char) * nameLen);
     parseName(&answer->name, assembled, strlen(assembled));
-    free(assembled );
+    free(assembled);
 
     answer->type = (buffer[(*offset)++] << 8) + buffer[(*offset)++];
     answer->aclass = buffer[(*offset)++];
@@ -38,18 +38,18 @@ namespace mDNSResolver {
     answer->ttl = (buffer[(*offset)++] << 24) + (buffer[(*offset)++] << 16) + (buffer[(*offset)++] << 8) + buffer[(*offset)++];
     answer->len = (buffer[(*offset)++] << 8) + buffer[(*offset)++];
 
-    //if(answer->type == MDNS_A_RECORD) {
-      //answer->data = (byte *)malloc(sizeof(byte) * answer->len);
-      //memcpy(answer->data, buffer + (*offset), answer->len);
-      //(*offset) += answer->len;
+    if(answer->type == MDNS_A_RECORD) {
+      answer->data = (unsigned char *)malloc(sizeof(unsigned char) * answer->len);
+      memcpy(answer->data, buffer + (*offset), answer->len);
+      (*offset) += answer->len;
     //if(answer->type == MDNS_CNAME_RECORD) {
       //unsigned int dataOffset = (*offset);
       //(*offset) += answer->len;
       //Answer::assembleName(buffer, len, &dataOffset, &assembled, answer->len);
       //answer->len = parseName(answer->data, assembled, strlen(assembled));
-    //} else {
-      //// Not an A record or a CNAME. Ignore.
-    //}
+    } else {
+      // Not an A record or a CNAME. Ignore.
+    }
     return E_MDNS_OK;
   }
 
@@ -126,7 +126,7 @@ namespace mDNSResolver {
 
     while(index < maxlen) {
       if((buffer[*offset] & 0xc0) == 0xc0) {
-        unsigned int pointerOffset = ((buffer[(*offset)++] & 0x3f) << 8) + buffer[*offset];
+        unsigned int pointerOffset = ((buffer[(*offset)++] & 0x3f) << 8) + buffer[(*offset)++];
         if(pointerOffset > len) {
           // Points to somewhere beyond the packet
           return -1 * E_MDNS_POINTER_OVERFLOW;
