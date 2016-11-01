@@ -135,7 +135,7 @@ SCENARIO("assembling a name") {
       0x07, 'l', 'o', 'c', 'a', 'l', 0x00,
       0x05, 't', 'e', 's', 't', '2',
       0xc0, 0x05, // Points at local
-      0xc0, 0x00, // Points at test.local
+      0xc0, 0x2d, // Overflow
       0xc0, 0x0c, // Points at test2.local
     };
 
@@ -200,5 +200,18 @@ SCENARIO("assembling a name") {
 
       free(result);
     }
+
+    WHEN("assembling a name with an overflowing pointer") {
+      char* result = (char *)malloc(sizeof(char) * MDNS_MAX_NAME_LEN);
+      unsigned int offset = 20;
+      int len = Answer::assembleName(buffer, 24, &offset, &result);
+
+      THEN("the returned -1 * E_MDNS_POINTER_OVERFLOW") {
+        REQUIRE(len == -1 * E_MDNS_POINTER_OVERFLOW);
+      }
+
+      free(result);
+    }
+
   }
 }
