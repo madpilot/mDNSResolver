@@ -292,7 +292,7 @@ SCENARIO("assembling a name") {
 
       THEN("the data should equal another name") {
         const char *expected = "nas.local";
-        REQUIRE(strcmp(expected, (char *)answer.data) == 0);
+        REQUIRE(memcmp(expected, (char *)answer.data, answer.len) == 0);
       }
     }
   }

@@ -46,23 +46,24 @@ namespace mDNSResolver {
       (*offset) += answer->len;
     } else if(answer->type == MDNS_CNAME_RECORD) {
       unsigned int dataOffset = (*offset);
-      //(*offset) += answer->len;
-
-      //char* assembled = (char *)malloc(sizeof(char) * MDNS_MAX_NAME_LEN);
-      //MDNS_RESULT result = Answer::assembleName(buffer, len, &dataOffset, &assembled, answer->len);
-      //if(result != E_MDNS_OK) {
-        //free(assembled);
-        //return result;
-      //}
-      //printf("Assembled: %s\n", assembled);
-      //answer->len = parseName(answer->data, assembled, strlen(assembled));
-      //free(assembled);
-      answer->data = (unsigned char *)malloc(sizeof(unsigned char) * answer->len);
-      memcpy(answer->data, buffer + (*offset), answer->len);
       (*offset) += answer->len;
+
+      char* assembled = (char *)malloc(sizeof(char) * MDNS_MAX_NAME_LEN);
+      MDNS_RESULT result = Answer::assembleName(buffer, len, &dataOffset, &assembled, answer->len);
+      if(result != E_MDNS_OK) {
+        free(assembled);
+        return result;
+      }
+
+      printf("Assembled: %s\n", assembled);
+      //answer->len = parseName(answer->data, assembled, strlen(assembled));
+      free(assembled);
     } else {
       // Not an A record or a CNAME. Ignore.
+      answer->len = 0;
+      answer->data = NULL;
     }
+
     return E_MDNS_OK;
   }
 
