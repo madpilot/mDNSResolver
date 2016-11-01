@@ -1,4 +1,6 @@
 #include "Answer.h"
+
+#include <string.h>
 #include <stdlib.h>
 
 namespace mDNSResolver {
@@ -105,30 +107,32 @@ namespace mDNSResolver {
   int Answer::assembleName(unsigned char *buffer, unsigned int len, unsigned int *offset, char **name, unsigned int maxlen) {
     unsigned int index = 0;
 
-    while(buffer[*offset] != '\0' && index < maxlen) {
+    while(index < maxlen) {
       if((buffer[*offset] & 0xc0) == 0xc0) {
-        char *pointer;
         unsigned int pointerOffset = ((buffer[(*offset)++] & 0x3f) << 8) + buffer[*offset];
         if(pointerOffset > len) {
           // Points to somewhere beyond the packet
           return -1 * E_MDNS_POINTER_OVERFLOW;
         }
-        assembleName(buffer, len, &pointerOffset, &pointer);
 
-        unsigned int pointerLen = strlen(pointer);
-        memcpy(*name + index, pointer, pointerLen);
+        char *namePointer = *name + index;
+        int pointerLen = assembleName(buffer, len, &pointerOffset, &namePointer, maxlen - index);
+
+        if(pointerLen < 0) {
+          return pointerLen;
+        }
 
         index += pointerLen;
-        free(pointer);
 
+        break;
+      } else if(buffer[*offset] == '\0') {
+        (*name)[index++] = buffer[(*offset)++];
         break;
       } else {
         (*name)[index++] = buffer[(*offset)++];
       }
     }
 
-    (*name)[index++] = '\0';
-    (*offset)++;
     return index;
   }
 

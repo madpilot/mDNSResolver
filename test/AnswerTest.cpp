@@ -1,6 +1,9 @@
 #include "catch.h"
 #include "Cache.h"
 
+#include <string.h>
+#include <stdlib.h>
+
 #include "Constants.h"
 #include "Answer.h"
 
@@ -126,7 +129,7 @@ SCENARIO("Parsing a name") {
 }
 
 SCENARIO("assembling a name") {
-  GIVEN("a full name") {
+  GIVEN("a buffer") {
     unsigned char buffer[] = {
       0x04, 't', 'e', 's', 't',
       0x07, 'l', 'o', 'c', 'a', 'l', 0x00,
@@ -136,9 +139,10 @@ SCENARIO("assembling a name") {
       0xc0, 0x0c, // Points at test2.local
     };
 
-    WHEN("assembling") {
+    WHEN("assembling a full name") {
       char* result = (char *)malloc(sizeof(char) * MDNS_MAX_NAME_LEN);
-      int len = Answer::assembleName(buffer, 24, 0, &result);
+      unsigned int offset = 0;
+      int len = Answer::assembleName(buffer, 24, &offset, &result);
 
       THEN("the returned value should be the same as the source length") {
         REQUIRE(len == 12);
@@ -146,6 +150,31 @@ SCENARIO("assembling a name") {
 
       THEN("the name returns the name unchanged") {
         REQUIRE(memcmp(result, buffer, 12) == 0);
+      }
+
+      THEN("offset should be incremented") {
+        REQUIRE(offset == 12);
+      }
+
+      free(result);
+    }
+
+    WHEN("assembling a name with a pointer") {
+      char* result = (char *)malloc(sizeof(char) * MDNS_MAX_NAME_LEN);
+      unsigned int offset = 12;
+      int len = Answer::assembleName(buffer, 24, &offset, &result);
+
+      THEN("the returned value should be the same as the source length") {
+        REQUIRE(len == 13);
+      }
+
+      THEN("resolve the pointer") {
+        unsigned char expected[] = {
+          0x05, 't', 'e', 's', 't', '2',
+          0x07, 'l', 'o', 'c', 'a', 'l', 0x00
+        };
+
+        REQUIRE(memcmp(result, expected, 13) == 0);
       }
 
       free(result);
