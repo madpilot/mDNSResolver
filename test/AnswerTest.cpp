@@ -238,6 +238,31 @@ SCENARIO("assembling a name") {
         REQUIRE(result == E_MDNS_OK);
       }
 
+      THEN("the name should equal a domain") {
+        const char* expected = "nas.local";
+        REQUIRE(strcmp(expected, (char *)answer.name) == 0);
+      }
+
+      THEN("the type should be correct") {
+        REQUIRE(answer.type == 1);
+      }
+
+      THEN("the class should be correct") {
+        REQUIRE(answer.aclass == 1);
+      }
+
+      THEN("the flush value should be correct") {
+        REQUIRE(answer.cacheflush == 1);
+      }
+
+      THEN("the TTL should be correct") {
+        REQUIRE(answer.ttl == 120);
+      }
+
+      THEN("the data length should be correct") {
+        REQUIRE(answer.len == 4);
+      }
+
       THEN("the data should equal the ip address") {
         unsigned char expected[] = {
           0xc0, 0xa8, 0x01, 0x02
@@ -263,6 +288,11 @@ SCENARIO("assembling a name") {
 
       THEN("the answer is parsed") {
         REQUIRE(result == E_MDNS_OK);
+      }
+
+      THEN("the data should equal another name") {
+        const char *expected = "nas.local";
+        REQUIRE(strcmp(expected, (char *)answer.data) == 0);
       }
     }
   }

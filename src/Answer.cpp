@@ -32,8 +32,10 @@ namespace mDNSResolver {
     free(assembled);
 
     answer->type = (buffer[(*offset)++] << 8) + buffer[(*offset)++];
-    answer->aclass = buffer[(*offset)++];
-    answer->cacheflush = buffer[(*offset)++];
+
+    unsigned int aclass = (buffer[(*offset)++] << 8) + buffer[(*offset)++];
+    answer->cacheflush = aclass >> 15;
+    answer->aclass = aclass & 0x7f;
 
     answer->ttl = (buffer[(*offset)++] << 24) + (buffer[(*offset)++] << 16) + (buffer[(*offset)++] << 8) + buffer[(*offset)++];
     answer->len = (buffer[(*offset)++] << 8) + buffer[(*offset)++];
@@ -42,11 +44,14 @@ namespace mDNSResolver {
       answer->data = (unsigned char *)malloc(sizeof(unsigned char) * answer->len);
       memcpy(answer->data, buffer + (*offset), answer->len);
       (*offset) += answer->len;
-    //if(answer->type == MDNS_CNAME_RECORD) {
+    } else if(answer->type == MDNS_CNAME_RECORD) {
       //unsigned int dataOffset = (*offset);
       //(*offset) += answer->len;
       //Answer::assembleName(buffer, len, &dataOffset, &assembled, answer->len);
       //answer->len = parseName(answer->data, assembled, strlen(assembled));
+      answer->data = (unsigned char *)malloc(sizeof(unsigned char) * answer->len);
+      memcpy(answer->data, buffer + (*offset), answer->len);
+      (*offset) += answer->len;
     } else {
       // Not an A record or a CNAME. Ignore.
     }
