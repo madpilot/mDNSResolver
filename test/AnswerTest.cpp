@@ -222,7 +222,7 @@ SCENARIO("assembling a name") {
     Udp.read(packet, len);
 
     WHEN("parsing") {
-      unsigned int offset = 0;
+      unsigned int offset = 12;
       Answer answer;
       int result = Answer::parseAnswer(packet, len, &offset, &answer);
 

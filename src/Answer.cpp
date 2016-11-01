@@ -19,15 +19,15 @@ namespace mDNSResolver {
   }
 
   MDNS_RESULT Answer::parseAnswer(unsigned char* buffer, unsigned int len, unsigned int* offset, Answer* answer) {
-    char* assembled = (char *)malloc(sizeof(char) * MDNS_RESOLVER_MAX_CACHE);
-    int assembleResult = Answer::assembleName(buffer, len, offset, &assembled);
+    char* assembled = (char *)malloc(sizeof(char) * MDNS_MAX_NAME_LEN);
+    int nameLen = Answer::assembleName(buffer, len, offset, &assembled);
 
-    if(assembleResult != E_MDNS_OK) {
-      free(assembled );
-      return assembleResult;
+    if(nameLen == -1 * E_MDNS_POINTER_OVERFLOW) {
+      free(assembled);
+      return nameLen;
     }
 
-    answer->name = (char *)malloc(sizeof(char) * strlen(assembled));
+    answer->name = (char *)malloc(sizeof(char) * nameLen);
     parseName(&answer->name, assembled, strlen(assembled));
     free(assembled );
 
