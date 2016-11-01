@@ -116,8 +116,12 @@ namespace mDNSResolver {
     while(mapPointer < len) {
       int labelLength = mapped[mapPointer++];
 
-      if(namePointer + labelLength > len - 1) {
+      if(labelLength > 0x3f) {
         return E_MDNS_INVALID_LABEL_LENGTH;
+      }
+
+      if(namePointer + labelLength > len - 1) {
+        return E_MDNS_PACKET_ERROR;
       }
 
       if(namePointer != 0) {
@@ -188,14 +192,14 @@ namespace mDNSResolver {
           (*offset) += 2;
           break;
         } else {
-          unsigned int labelSize = (unsigned int)buffer[*offset];
+          unsigned int labelLength = (unsigned int)buffer[*offset];
 
-          if(labelSize > 0x3f) {
-            return E_MDNS_PACKET_ERROR;
+          if(labelLength > 0x3f) {
+            return E_MDNS_INVALID_LABEL_LENGTH;
           }
 
           (*offset) += 1; // Increment to move to the next byte
-          (*offset) += labelSize;
+          (*offset) += labelLength;
 
           if(*offset > len) {
             return E_MDNS_PACKET_ERROR;
