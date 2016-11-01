@@ -147,7 +147,7 @@ namespace mDNSResolver {
         }
 
         char *namePointer = *name + nameLength;
-        int pointerLen = assembleName(buffer, len, &pointerOffset, &namePointer, maxlen - nameLength);
+        int pointerLen = assembleName(buffer, len, &pointerOffset, &namePointer, MDNS_MAX_NAME_LEN - nameLength);
 
         if(pointerLen < 0) {
           return pointerLen;
