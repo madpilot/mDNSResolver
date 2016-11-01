@@ -179,5 +179,26 @@ SCENARIO("assembling a name") {
 
       free(result);
     }
+
+    WHEN("assembling a name that is a pointer") {
+      char* result = (char *)malloc(sizeof(char) * MDNS_MAX_NAME_LEN);
+      unsigned int offset = 22;
+      int len = Answer::assembleName(buffer, 24, &offset, &result);
+
+      THEN("the returned value should be the same as the source length") {
+        REQUIRE(len == 13);
+      }
+
+      THEN("resolve the pointer") {
+        unsigned char expected[] = {
+          0x05, 't', 'e', 's', 't', '2',
+          0x07, 'l', 'o', 'c', 'a', 'l', 0x00
+        };
+
+        REQUIRE(memcmp(result, expected, 13) == 0);
+      }
+
+      free(result);
+    }
   }
 }
