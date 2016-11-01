@@ -45,10 +45,18 @@ namespace mDNSResolver {
       memcpy(answer->data, buffer + (*offset), answer->len);
       (*offset) += answer->len;
     } else if(answer->type == MDNS_CNAME_RECORD) {
-      //unsigned int dataOffset = (*offset);
+      unsigned int dataOffset = (*offset);
       //(*offset) += answer->len;
-      //Answer::assembleName(buffer, len, &dataOffset, &assembled, answer->len);
+
+      //char* assembled = (char *)malloc(sizeof(char) * MDNS_MAX_NAME_LEN);
+      //MDNS_RESULT result = Answer::assembleName(buffer, len, &dataOffset, &assembled, answer->len);
+      //if(result != E_MDNS_OK) {
+        //free(assembled);
+        //return result;
+      //}
+      //printf("Assembled: %s\n", assembled);
       //answer->len = parseName(answer->data, assembled, strlen(assembled));
+      //free(assembled);
       answer->data = (unsigned char *)malloc(sizeof(unsigned char) * answer->len);
       memcpy(answer->data, buffer + (*offset), answer->len);
       (*offset) += answer->len;
@@ -128,6 +136,7 @@ namespace mDNSResolver {
 
   int Answer::assembleName(unsigned char *buffer, unsigned int len, unsigned int *offset, char **name, unsigned int maxlen) {
     unsigned int index = 0;
+    unsigned int nameLength = 0;
 
     while(index < maxlen) {
       if((buffer[*offset] & 0xc0) == 0xc0) {
@@ -137,25 +146,26 @@ namespace mDNSResolver {
           return -1 * E_MDNS_POINTER_OVERFLOW;
         }
 
-        char *namePointer = *name + index;
-        int pointerLen = assembleName(buffer, len, &pointerOffset, &namePointer, maxlen - index);
+        char *namePointer = *name + nameLength;
+        int pointerLen = assembleName(buffer, len, &pointerOffset, &namePointer, maxlen - nameLength);
 
         if(pointerLen < 0) {
           return pointerLen;
         }
 
-        index += pointerLen;
+        nameLength += pointerLen;
 
         break;
       } else if(buffer[*offset] == '\0') {
-        (*name)[index++] = buffer[(*offset)++];
+        (*name)[nameLength++] = buffer[(*offset)++];
         break;
       } else {
-        (*name)[index++] = buffer[(*offset)++];
+        (*name)[nameLength++] = buffer[(*offset)++];
       }
+      index++;
     }
 
-    return index;
+    return nameLength;
   }
 
   int Answer::assembleName(unsigned char *buffer, unsigned int len, unsigned int *offset, char **name) {
