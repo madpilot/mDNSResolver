@@ -4,9 +4,57 @@
 #include <stdlib.h>
 
 namespace mDNSResolver {
-  Answer::Answer() {}
+  Answer::Answer() {
+    this->name = NULL;
+    this->data = NULL;
+  }
 
-  MDNS_RESULT Answer::parse(unsigned char* buffer, unsigned int len) {
+  Answer::~Answer() {
+    if(this->name) {
+      free(this->name);
+    }
+    if(this->data) {
+      free(this->data);
+    }
+  }
+
+  MDNS_RESULT Answer::parseAnswer(unsigned char* buffer, unsigned int len, unsigned int* offset, Answer* answer) {
+    char* assembled = (char *)malloc(sizeof(char) * MDNS_RESOLVER_MAX_CACHE);
+    int assembleResult = Answer::assembleName(buffer, len, offset, &assembled);
+
+    if(assembleResult != E_MDNS_OK) {
+      free(assembled );
+      return assembleResult;
+    }
+
+    answer->name = (char *)malloc(sizeof(char) * strlen(assembled));
+    parseName(&answer->name, assembled, strlen(assembled));
+    free(assembled );
+
+    answer->type = (buffer[(*offset)++] << 8) + buffer[(*offset)++];
+    answer->aclass = buffer[(*offset)++];
+    answer->cacheflush = buffer[(*offset)++];
+
+    answer->ttl = (buffer[(*offset)++] << 24) + (buffer[(*offset)++] << 16) + (buffer[(*offset)++] << 8) + buffer[(*offset)++];
+    answer->len = (buffer[(*offset)++] << 8) + buffer[(*offset)++];
+
+    //if(answer->type == MDNS_A_RECORD) {
+      //answer->data = (byte *)malloc(sizeof(byte) * answer->len);
+      //memcpy(answer->data, buffer + (*offset), answer->len);
+      //(*offset) += answer->len;
+    //if(answer->type == MDNS_CNAME_RECORD) {
+      //unsigned int dataOffset = (*offset);
+      //(*offset) += answer->len;
+      //Answer::assembleName(buffer, len, &dataOffset, &assembled, answer->len);
+      //answer->len = parseName(answer->data, assembled, strlen(assembled));
+    //} else {
+      //// Not an A record or a CNAME. Ignore.
+    //}
+    return E_MDNS_OK;
+  }
+
+  // Response should have the name set already
+  MDNS_RESULT Answer::buildResponse(unsigned char* buffer, unsigned int len, Response& response) {
     if((buffer[2] & 0b10000000) != 0b10000000) {
       // Not an answer packet
       return E_MDNS_OK;
@@ -35,44 +83,13 @@ namespace mDNSResolver {
       return questionResult;
     }
 
-    //for(int i = 0; i < answerCount; i++) {
-      //Answer answer();
+    Answer* answers = new Answer[answerCount];
+    for(int i = 0; i < answerCount; i++) {
+      parseAnswer(buffer, len, &offset, answers + i);
+    }
 
-      //if(parseAnswer(buffer, len, &offset, &answer) == E_MDNS_OK) {
-        //int resultIndex = search(answer.name);
-        //if(resultIndex != -1) {
-          //if(answer.type == 0x01) {
-            //_cache[resultIndex].ipAddress = IPAddress((int)answer.data[0], (int)answer.data[1], (int)answer.data[2], (int)answer.data[3]);
-            //_cache[resultIndex].ttl = answer.ttl;
-            //_cache[resultIndex].waiting = false;
-          //} else if(answer.type == 0x05) {
-            //// If data is already in there, copy the data
-            //int cnameIndex = search((char *)answer.data);
-
-            //if(cnameIndex != -1) {
-              //_cache[resultIndex].ipAddress = _cache[cnameIndex].ipAddress;
-              //_cache[resultIndex].waiting = false;
-              //_cache[resultIndex].ttl = answer.ttl;
-            //} else {
-              //Response r = buildResponse((char *)answer.data);
-              //insert(r);
-            //}
-          //}
-        //}
-
-        //free(answer.data);
-        //free(answer.name);
-        //return E_MDNS_OK;
-      //} else {
-        //if(answer.data) {
-          //free(answer.data);
-        //}
-        //if(answer.name) {
-          //free(answer.name);
-        //}
-        //return E_MDNS_PARSING_ERROR;
-      //}
-    //}
+    delete[] answers;
+    return E_MDNS_OK;
   }
 
   // Converts a encoded DNS name into a FQDN.

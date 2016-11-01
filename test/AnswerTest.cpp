@@ -212,6 +212,23 @@ SCENARIO("assembling a name") {
 
       free(result);
     }
+  }
 
+  GIVEN("a packet with a CNAME") {
+    UDP Udp = UDP::loadFromFile("fixtures/cname_answer.bin");
+    unsigned len = Udp.parsePacket();
+    unsigned char *packet = (unsigned char *)malloc(sizeof(unsigned char) * len);
+
+    Udp.read(packet, len);
+
+    WHEN("parsing") {
+      unsigned int offset = 0;
+      Answer answer;
+      int result = Answer::parseAnswer(packet, len, &offset, &answer);
+
+      THEN("the answer is parsed") {
+        REQUIRE(result == E_MDNS_OK);
+      }
+    }
   }
 }
