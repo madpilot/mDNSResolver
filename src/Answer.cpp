@@ -29,8 +29,6 @@ namespace mDNSResolver {
 
     answer->name = (char *)malloc(sizeof(char) * nameLen);
     parseName(&answer->name, assembled, strlen(assembled));
-    free(assembled);
-
     answer->type = (buffer[(*offset)++] << 8) + buffer[(*offset)++];
 
     unsigned int aclass = (buffer[(*offset)++] << 8) + buffer[(*offset)++];
@@ -47,8 +45,6 @@ namespace mDNSResolver {
     } else if(answer->type == MDNS_CNAME_RECORD) {
       unsigned int dataOffset = (*offset);
       (*offset) += answer->len;
-
-      char* assembled = (char *)malloc(sizeof(char) * MDNS_MAX_NAME_LEN);
       int dataLen = Answer::assembleName(buffer, len, &dataOffset, &assembled, answer->len);
 
       if(dataLen == -1 * E_MDNS_POINTER_OVERFLOW) {
@@ -62,12 +58,13 @@ namespace mDNSResolver {
       // This will fragment...
       char* d = (char *)answer->data;
       parseName(&d, assembled, dataLen - 1);
-      free(assembled);
     } else {
       // Not an A record or a CNAME. Ignore.
       answer->len = 0;
       answer->data = NULL;
     }
+
+    free(assembled);
 
     return E_MDNS_OK;
   }
