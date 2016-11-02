@@ -49,14 +49,19 @@ namespace mDNSResolver {
       (*offset) += answer->len;
 
       char* assembled = (char *)malloc(sizeof(char) * MDNS_MAX_NAME_LEN);
-      MDNS_RESULT result = Answer::assembleName(buffer, len, &dataOffset, &assembled, answer->len);
-      if(result != E_MDNS_OK) {
+      int dataLen = Answer::assembleName(buffer, len, &dataOffset, &assembled, answer->len);
+
+      if(dataLen == -1 * E_MDNS_POINTER_OVERFLOW) {
         free(assembled);
-        return result;
+        return dataLen;
       }
 
-      printf("Assembled: %s\n", assembled);
-      //answer->len = parseName(answer->data, assembled, strlen(assembled));
+      answer->data = (unsigned char *)malloc(sizeof(unsigned char) * (dataLen - 1));
+      answer->len = dataLen - 1;
+
+      // This will fragment...
+      char* d = (char *)answer->data;
+      parseName(&d, assembled, dataLen - 1);
       free(assembled);
     } else {
       // Not an A record or a CNAME. Ignore.

@@ -102,7 +102,7 @@ SCENARIO("Parsing a name") {
       int r = Answer::parseName(&result, name, 11);
 
       THEN("returns an E_MDNS_INVALID_LABEL_LENGTH") {
-        REQUIRE(r == E_MDNS_INVALID_LABEL_LENGTH);
+        REQUIRE(r == E_MDNS_PACKET_ERROR);
       }
 
       free(result);
@@ -120,7 +120,7 @@ SCENARIO("Parsing a name") {
       int r = Answer::parseName(&result, name, 11);
 
       THEN("returns an E_MDNS_INVALID_LABEL_LENGTH") {
-        REQUIRE(r == E_MDNS_INVALID_LABEL_LENGTH);
+        REQUIRE(r == E_MDNS_PACKET_ERROR);
       }
 
       free(result);
