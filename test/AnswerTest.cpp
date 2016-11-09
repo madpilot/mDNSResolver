@@ -18,147 +18,141 @@ SCENARIO("resolving a packet") {
   unsigned char *packet = (unsigned char *)malloc(sizeof(unsigned char) * len);
   Udp.read(packet, len);
 
-  GIVEN("an A-record to parse") {
-    unsigned int offset = 68;
+  GIVEN("an empty cache") {
+    Cache cache;
 
-    GIVEN("an empty cache") {
-      Cache cache;
+    WHEN("parsing an A-record") {
+      unsigned int offset = 68;
+      Answer::resolve(packet, len, &offset, cache);
 
-      WHEN("parsing an answer") {
+      THEN("the cache should still be empty") {
+        REQUIRE(cache.length() == 0);
+      }
+    }
+
+    WHEN("parsing an CNAME-record") {
+      unsigned int offset = 12;
+      Answer::resolve(packet, len, &offset, cache);
+
+      THEN("the cache should still be empty") {
+        REQUIRE(cache.length() == 0);
+      }
+    }
+
+  }
+
+  GIVEN("a cache") {
+    Cache cache;
+
+    GIVEN("an unresolved Response object") {
+      Response response(std::string("test.local"));
+      cache.insert(response);
+
+      WHEN("parsing an A-record answer with a name that does not match the Response object") {
+        unsigned int offset = 68;
         Answer::resolve(packet, len, &offset, cache);
 
-        THEN("the cache should still be empty") {
-          REQUIRE(cache.length() == 0);
+        THEN("the cache will not expand") {
+          REQUIRE(cache.length() == 1);
+        }
+
+        THEN("the response object will still be unresolved") {
+          REQUIRE(response.resolved == false);
+        }
+      }
+
+      WHEN("parsing a CNAME-record answer with a name that does not match the Response object") {
+        unsigned int offset = 12;
+        Answer::resolve(packet, len, &offset, cache);
+
+        THEN("the cache will not expand") {
+          REQUIRE(cache.length() == 1);
+        }
+
+        THEN("the response object will still be unresolved") {
+          REQUIRE(response.resolved == false);
         }
       }
     }
 
-    GIVEN("a cache with a response") {
-      Response response(std::string(""));
+    GIVEN("an unresolved Response object") {
+      Response response(std::string("nas.local"));
       cache.insert(response);
 
-      GIVEN("the A-record name is not found in the cache") {
-        response.name = std::string("test.local");
+      WHEN("parsing an A-record answer with a name that matches the Response object") {
+        unsigned int offset = 68;
+        MDNS_RESULT result = Answer::resolve(packet, len, &offset, cache);
 
-        WHEN("parsing an answer") {
-          Answer::resolve(packet, len, &offset, cache);
+        THEN("result should be ok") {
+          REQUIRE(result == E_MDNS_OK);
+        }
 
-          THEN("the response object will still be unresolved") {
-            REQUIRE(response.resolved == false);
-          }
+        THEN("the cache will not expand") {
+          REQUIRE(cache.length() == 1);
+        }
+
+        THEN("the response request object will be resolved") {
+          REQUIRE(cache[0].resolved == true);
+        }
+
+        THEN("the TTL will be set") {
+          REQUIRE(cache[0].ttl == 120);
+        }
+
+        THEN("the response request object will have the correct IP address object") {
+          REQUIRE(cache[0].ipAddress == IPAddress(192, 168, 1, 2));
         }
       }
+    }
 
-      GIVEN("the A-record name is found in the cache") {
-        response.name = std::string("nas.local");
+    GIVEN("an unresolved Response object") {
+      Response response(std::string("mqtt.local"));
+      cache.insert(response);
 
-        WHEN("parsing an answer") {
-          MDNS_RESULT result = Answer::resolve(packet, len, &offset, cache);
+      WHEN("parsing an CNAME-record answer with a name that matches the Response object") {
+        unsigned int offset = 12;
+        MDNS_RESULT result = Answer::resolve(packet, len, &offset, cache);
 
-          THEN("result should be ok") {
-            REQUIRE(result == E_MDNS_OK);
+        THEN("result should be ok") {
+          REQUIRE(result == E_MDNS_OK);
+        }
+
+        WHEN("the pointed name is not in the cache") {
+          THEN("the cache will expand") {
+            REQUIRE(cache.length() == 2);
           }
 
-          THEN("the response request object will be resolved") {
-            REQUIRE(cache[0].resolved == true);
+          THEN("the Response object will point to the new Response object") {
+            REQUIRE(*cache[0].cname == cache[1]);
           }
 
-          THEN("the TTL will be set") {
-            REQUIRE(cache[0].ttl == 120);
+          THEN("the Response object cname pointer's name will match the data payload") {
+            REQUIRE(cache[0].cname->name == std::string("nas.local"));
+          }
+        }
+
+        WHEN("the pointed name is in the cache") {
+          Response response2("nas.local");
+          cache.insert(response2);
+
+          THEN("the cache will not expand") {
+            REQUIRE(cache.length() == 2);
           }
 
-          THEN("the response request object will have the correct IP address object") {
-            REQUIRE(cache[0].ipAddress == IPAddress(192, 168, 1, 2));
+          THEN("the Response object will point to the old Response object") {
+            REQUIRE(*cache[0].cname == cache[1]);
           }
+
+          cache.remove(response2);
+        }
+
+        THEN("the response request object will not resolved") {
+          REQUIRE(cache[0].resolved == false);
         }
       }
     }
   }
-
-  //GIVEN("a cache with a A-record response that will match the name in the cache") {
-    //unsigned int offset = 12;
-    //Response hit(std::string("nas.local"));
-    //cache.insert(hit);
-
-    //WHEN("resolving a response not already in the cache") {
-      //MDNS_RESULT result = Answer::resolve(packet, len, &offset, cache);
-
-      //THEN("result should be ok") {
-        //REQUIRE(result == E_MDNS_OK);
-      //}
-
-      //THEN("the response request object will be resolved") {
-        //REQUIRE(cache[0].resolved == true);
-      //}
-
-      //THEN("the TTL will be set") {
-        //REQUIRE(cache[0].ttl == 120);
-      //}
-
-      //THEN("the response request object will have the correct IP address object") {
-        //REQUIRE(cache[0].ipAddress == IPAddress(192, 168, 1, 2));
-      //}
-    //}
-
-    //WHEN("
-
-  //GIVEN("a cache with a cname response that will match the name in the cache") {
-    //unsigned int offset = 12;
-    //Response cname(std::string("mqtt.local"));
-    //cache.insert(cname);
-    //int oldLen = cache.length();
-
-    //WHEN("resolving") {
-      //MDNS_RESULT result = Answer::resolve(packet, len, &offset, cache);
-
-      //THEN("result should be ok") {
-        //REQUIRE(result == E_MDNS_OK);
-      //}
-
-      //THEN("there will be a new object in the cache") {
-        //REQUIRE(cache.length() == oldLen + 1);
-      //}
-
-      //THEN("the response request object will not be resolved") {
-        //REQUIRE(cache[0].resolved == false);
-      //}
-
-      //THEN("the response request object will have a pointer to a Response object that matches it's data") {
-        //REQUIRE(cache[0].cname->name == cache[1].name);
-      //}
-    //}
-  //}
-
-  //GIVEN("a cache with a cname response that will match the name in the cache, where there is a response object that matches the cname pointer") {
-    //Response cname(std::string("mqtt.local"));
-    //Response a(std::string("nas.local"));
-    //Cache cache;
-    //cache.insert(cname);
-    //cache.insert(a);
-    //int oldLen = cache.length();
-
-
-      //MDNS_RESULT result = Answer::resolve(packet, len, &offset, cache);
-
-      //THEN("result should be ok") {
-        //REQUIRE(result == E_MDNS_OK);
-      //}
-
-      //THEN("there will be a new object in the cache") {
-        //REQUIRE(cache.length() == oldLen);
-      //}
-
-      //THEN("the response request object will not be resolved") {
-        //REQUIRE(cache[0].resolved == false);
-      //}
-
-      //THEN("the response request object will have a pointer to a Response object that matches it's data") {
-        //REQUIRE(cache[0].cname->name == response2.name);
-      //}
-    //}
-
-  //}
-//}
+}
 
 SCENARIO("mDNS packet with a question is received.") {
   GIVEN("the packet has questions") {
