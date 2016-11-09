@@ -85,6 +85,7 @@ SCENARIO("resolving a packet") {
       Response response(std::string("mqtt.local"));
       Cache cache;
       cache.insert(response);
+      int oldLen = cache.length();
 
       UDP Udp = UDP::loadFromFile("fixtures/cname_answer.bin");
       unsigned len = Udp.parsePacket();
@@ -97,6 +98,10 @@ SCENARIO("resolving a packet") {
 
       THEN("result should be ok") {
         REQUIRE(result == E_MDNS_OK);
+      }
+
+      THEN("there will be a new object in the cache") {
+        REQUIRE(cache.length() == oldLen + 1);
       }
 
       THEN("the response request object will not be resolved") {
