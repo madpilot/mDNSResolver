@@ -50,22 +50,22 @@ namespace mDNSResolver {
       } else {
         (*offset) += dataLen;
       }
-    //} else if(answer->type == MDNS_CNAME_RECORD) {
-      //unsigned int dataOffset = (*offset);
-      //(*offset) += answer->len;
-      //int dataLen = Answer::assembleName(buffer, len, &dataOffset, &assembled, answer->len);
+    } else if(type == MDNS_CNAME_RECORD && index != -1) {
+      unsigned int dataOffset = (*offset);
+      (*offset) += dataLen;
+      dataLen = Answer::assembleName(buffer, len, &dataOffset, &assembled, dataLen);
 
-      //if(dataLen == -1 * E_MDNS_POINTER_OVERFLOW) {
-        //free(assembled);
-        //return dataLen;
-      //}
+      if(dataLen == -1 * E_MDNS_POINTER_OVERFLOW) {
+        free(assembled);
+        return dataLen;
+      }
 
-      //answer->data = (unsigned char *)malloc(sizeof(unsigned char) * (dataLen - 1));
-      //answer->len = dataLen - 1;
-
-      //// This will fragment...
-      //char* d = (char *)answer->data;
-      //parseName(&d, assembled, dataLen - 1);
+      char *data = (char *)malloc(sizeof(char) * (dataLen - 1));
+      // This will fragment...
+      parseName(&data, assembled, dataLen - 1);
+      Response *r = new Response(std::string(data));
+      cache.insert(*r);
+      cache[index].cname = r;
     } else {
       // Not an A record or a CNAME. Ignore.
     }
