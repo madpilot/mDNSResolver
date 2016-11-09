@@ -112,6 +112,41 @@ SCENARIO("resolving a packet") {
         REQUIRE(cache[0].cname->name == cache[1].name);
       }
     }
+
+    WHEN("parsing an cname that matches the name in the cache, where the cname pointer is already in the cache") {
+      Response response(std::string("mqtt.local"));
+      Response response2(std::string("nas.local"));
+      Cache cache;
+      cache.insert(response);
+      cache.insert(response2);
+      int oldLen = cache.length();
+
+      UDP Udp = UDP::loadFromFile("fixtures/cname_answer.bin");
+      unsigned len = Udp.parsePacket();
+      unsigned char *packet = (unsigned char *)malloc(sizeof(unsigned char) * len);
+
+      Udp.read(packet, len);
+      unsigned int offset = 12;
+
+      MDNS_RESULT result = Answer::resolve(packet, len, &offset, cache);
+
+      THEN("result should be ok") {
+        REQUIRE(result == E_MDNS_OK);
+      }
+
+      THEN("there will be a new object in the cache") {
+        REQUIRE(cache.length() == oldLen);
+      }
+
+      THEN("the response request object will not be resolved") {
+        REQUIRE(cache[0].resolved == false);
+      }
+
+      THEN("the response request object will have a pointer to a Response object that matches it's data") {
+        REQUIRE(cache[0].cname->name == response2.name);
+      }
+    }
+
   }
 }
 
