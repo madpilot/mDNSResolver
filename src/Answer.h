@@ -3,6 +3,8 @@
 
 #include "Constants.h"
 #include "Response.h"
+#include "Cache.h"
+
 #include <string>
 #include <array>
 #include <vector>
@@ -12,6 +14,7 @@ namespace mDNSResolver {
   public:
     Answer();
     ~Answer();
+    static MDNS_RESULT resolve(unsigned char *buffer, unsigned int len, unsigned int *offset, Cache& cache);
     static MDNS_RESULT buildResponse(unsigned char* buffer, unsigned int len, Response& response);
 
     char *name;

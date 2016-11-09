@@ -18,6 +18,63 @@ namespace mDNSResolver {
     }
   }
 
+  MDNS_RESULT Answer::resolve(unsigned char *buffer, unsigned int len, unsigned int* offset, Cache& cache) {
+    char* assembled = (char *)malloc(sizeof(char) * MDNS_MAX_NAME_LEN);
+    int nameLen = Answer::assembleName(buffer, len, offset, &assembled);
+
+    if(nameLen == -1 * E_MDNS_POINTER_OVERFLOW) {
+      free(assembled);
+      return nameLen;
+    }
+
+    char *name = (char *)malloc(sizeof(char) * nameLen);
+    parseName(&name, assembled, strlen(assembled));
+
+    unsigned int type = (buffer[(*offset)++] << 8) + buffer[(*offset)++];
+    unsigned int aclass = (buffer[(*offset)++] << 8) + buffer[(*offset)++];
+    unsigned long ttl = (buffer[(*offset)++] << 24) + (buffer[(*offset)++] << 16) + (buffer[(*offset)++] << 8) + buffer[(*offset)++];
+    unsigned int dataLen = (buffer[(*offset)++] << 8) + buffer[(*offset)++];
+
+    int index = cache.search(name);
+    if(type == MDNS_A_RECORD && index != -1) {
+      if(dataLen == 4) {
+        unsigned int a = (unsigned int)*(buffer + (*offset)++);
+        unsigned int b = (unsigned int)*(buffer + (*offset)++);
+        unsigned int c = (unsigned int)*(buffer + (*offset)++);
+        unsigned int d = (unsigned int)*(buffer + (*offset)++);
+
+        cache[index].resolved = true;
+        cache[index].ttl = ttl;
+        cache[index].ipAddress = IPAddress(a, b, c, d);
+
+      } else {
+        (*offset) += dataLen;
+      }
+    //} else if(answer->type == MDNS_CNAME_RECORD) {
+      //unsigned int dataOffset = (*offset);
+      //(*offset) += answer->len;
+      //int dataLen = Answer::assembleName(buffer, len, &dataOffset, &assembled, answer->len);
+
+      //if(dataLen == -1 * E_MDNS_POINTER_OVERFLOW) {
+        //free(assembled);
+        //return dataLen;
+      //}
+
+      //answer->data = (unsigned char *)malloc(sizeof(unsigned char) * (dataLen - 1));
+      //answer->len = dataLen - 1;
+
+      //// This will fragment...
+      //char* d = (char *)answer->data;
+      //parseName(&d, assembled, dataLen - 1);
+    } else {
+      // Not an A record or a CNAME. Ignore.
+    }
+
+    free(assembled);
+
+    return E_MDNS_OK;
+  }
+
   MDNS_RESULT Answer::parseAnswer(unsigned char* buffer, unsigned int len, unsigned int* offset, Answer* answer) {
     char* assembled = (char *)malloc(sizeof(char) * MDNS_MAX_NAME_LEN);
     int nameLen = Answer::assembleName(buffer, len, offset, &assembled);

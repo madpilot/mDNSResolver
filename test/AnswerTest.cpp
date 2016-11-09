@@ -6,10 +6,83 @@
 
 #include "Constants.h"
 #include "Answer.h"
+#include "Cache.h"
 
 #include <UDP.h>
 
 using namespace mDNSResolver;
+
+SCENARIO("resolving a packet") {
+  GIVEN("an empty cache object") {
+    Cache cache;
+
+    WHEN("parsing an answer") {
+      UDP Udp = UDP::loadFromFile("fixtures/cname_answer.bin");
+      unsigned len = Udp.parsePacket();
+      unsigned char *packet = (unsigned char *)malloc(sizeof(unsigned char) * len);
+      unsigned int offset = 68;
+      Udp.read(packet, len);
+
+      Answer::resolve(packet, len, &offset, cache);
+
+      THEN("the cache should still be empty") {
+        REQUIRE(cache.length() == 0);
+      }
+    }
+  }
+
+  GIVEN("a cache with a response request") {
+    WHEN("parsing an answers that doesn't match the name in the cache") {
+      Response response(std::string("test.local"));
+      Cache cache;
+      cache.insert(response);
+
+      UDP Udp = UDP::loadFromFile("fixtures/cname_answer.bin");
+      unsigned len = Udp.parsePacket();
+      unsigned char *packet = (unsigned char *)malloc(sizeof(unsigned char) * len);
+
+      Udp.read(packet, len);
+      unsigned int offset = 68;
+      Answer::resolve(packet, len, &offset, cache);
+
+      THEN("the response request object will still be unresolved") {
+        REQUIRE(cache[0].resolved == false);
+      }
+    }
+
+    WHEN("parsing an answer that matches the name in the cache") {
+      Response response(std::string("nas.local"));
+      Cache cache;
+      cache.insert(response);
+
+      UDP Udp = UDP::loadFromFile("fixtures/cname_answer.bin");
+      unsigned len = Udp.parsePacket();
+      unsigned char *packet = (unsigned char *)malloc(sizeof(unsigned char) * len);
+
+      Udp.read(packet, len);
+      unsigned int offset = 68;
+
+      MDNS_RESULT result = Answer::resolve(packet, len, &offset, cache);
+
+      THEN("result should be ok") {
+        REQUIRE(result == E_MDNS_OK);
+      }
+
+      THEN("the response request object will be resolved") {
+        REQUIRE(cache[0].resolved == true);
+      }
+
+      THEN("the TTL will be set") {
+        REQUIRE(cache[0].ttl == 120);
+      }
+
+      THEN("the response request object will have the correct IP address object") {
+        REQUIRE(cache[0].ipAddress == IPAddress(192, 168, 1, 2));
+      }
+    }
+  }
+}
+
 SCENARIO("mDNS packet with a question is received.") {
   GIVEN("the packet has questions") {
     UDP Udp = UDP::loadFromFile("fixtures/question.bin");
