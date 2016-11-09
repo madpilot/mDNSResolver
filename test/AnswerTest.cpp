@@ -13,142 +13,152 @@
 using namespace mDNSResolver;
 
 SCENARIO("resolving a packet") {
-  GIVEN("an empty cache object") {
-    Cache cache;
+  UDP Udp = UDP::loadFromFile("fixtures/cname_answer.bin");
+  unsigned len = Udp.parsePacket();
+  unsigned char *packet = (unsigned char *)malloc(sizeof(unsigned char) * len);
+  Udp.read(packet, len);
 
-    WHEN("parsing an answer") {
-      UDP Udp = UDP::loadFromFile("fixtures/cname_answer.bin");
-      unsigned len = Udp.parsePacket();
-      unsigned char *packet = (unsigned char *)malloc(sizeof(unsigned char) * len);
-      unsigned int offset = 68;
-      Udp.read(packet, len);
+  GIVEN("an A-record to parse") {
+    unsigned int offset = 68;
 
-      Answer::resolve(packet, len, &offset, cache);
+    GIVEN("an empty cache") {
+      Cache cache;
 
-      THEN("the cache should still be empty") {
-        REQUIRE(cache.length() == 0);
+      WHEN("parsing an answer") {
+        Answer::resolve(packet, len, &offset, cache);
+
+        THEN("the cache should still be empty") {
+          REQUIRE(cache.length() == 0);
+        }
+      }
+    }
+
+    GIVEN("a cache with a response") {
+      Response response(std::string(""));
+      cache.insert(response);
+
+      GIVEN("the A-record name is not found in the cache") {
+        response.name = std::string("test.local");
+
+        WHEN("parsing an answer") {
+          Answer::resolve(packet, len, &offset, cache);
+
+          THEN("the response object will still be unresolved") {
+            REQUIRE(response.resolved == false);
+          }
+        }
+      }
+
+      GIVEN("the A-record name is found in the cache") {
+        response.name = std::string("nas.local");
+
+        WHEN("parsing an answer") {
+          MDNS_RESULT result = Answer::resolve(packet, len, &offset, cache);
+
+          THEN("result should be ok") {
+            REQUIRE(result == E_MDNS_OK);
+          }
+
+          THEN("the response request object will be resolved") {
+            REQUIRE(cache[0].resolved == true);
+          }
+
+          THEN("the TTL will be set") {
+            REQUIRE(cache[0].ttl == 120);
+          }
+
+          THEN("the response request object will have the correct IP address object") {
+            REQUIRE(cache[0].ipAddress == IPAddress(192, 168, 1, 2));
+          }
+        }
       }
     }
   }
 
-  GIVEN("a cache with a response request") {
-    WHEN("parsing an answers that doesn't match the name in the cache") {
-      Response response(std::string("test.local"));
-      Cache cache;
-      cache.insert(response);
+  //GIVEN("a cache with a A-record response that will match the name in the cache") {
+    //unsigned int offset = 12;
+    //Response hit(std::string("nas.local"));
+    //cache.insert(hit);
 
-      UDP Udp = UDP::loadFromFile("fixtures/cname_answer.bin");
-      unsigned len = Udp.parsePacket();
-      unsigned char *packet = (unsigned char *)malloc(sizeof(unsigned char) * len);
+    //WHEN("resolving a response not already in the cache") {
+      //MDNS_RESULT result = Answer::resolve(packet, len, &offset, cache);
 
-      Udp.read(packet, len);
-      unsigned int offset = 68;
-      Answer::resolve(packet, len, &offset, cache);
+      //THEN("result should be ok") {
+        //REQUIRE(result == E_MDNS_OK);
+      //}
 
-      THEN("the response request object will still be unresolved") {
-        REQUIRE(cache[0].resolved == false);
-      }
-    }
+      //THEN("the response request object will be resolved") {
+        //REQUIRE(cache[0].resolved == true);
+      //}
 
-    WHEN("parsing an answer that matches the name in the cache") {
-      Response response(std::string("nas.local"));
-      Cache cache;
-      cache.insert(response);
+      //THEN("the TTL will be set") {
+        //REQUIRE(cache[0].ttl == 120);
+      //}
 
-      UDP Udp = UDP::loadFromFile("fixtures/cname_answer.bin");
-      unsigned len = Udp.parsePacket();
-      unsigned char *packet = (unsigned char *)malloc(sizeof(unsigned char) * len);
+      //THEN("the response request object will have the correct IP address object") {
+        //REQUIRE(cache[0].ipAddress == IPAddress(192, 168, 1, 2));
+      //}
+    //}
 
-      Udp.read(packet, len);
-      unsigned int offset = 68;
+    //WHEN("
 
-      MDNS_RESULT result = Answer::resolve(packet, len, &offset, cache);
+  //GIVEN("a cache with a cname response that will match the name in the cache") {
+    //unsigned int offset = 12;
+    //Response cname(std::string("mqtt.local"));
+    //cache.insert(cname);
+    //int oldLen = cache.length();
 
-      THEN("result should be ok") {
-        REQUIRE(result == E_MDNS_OK);
-      }
+    //WHEN("resolving") {
+      //MDNS_RESULT result = Answer::resolve(packet, len, &offset, cache);
 
-      THEN("the response request object will be resolved") {
-        REQUIRE(cache[0].resolved == true);
-      }
+      //THEN("result should be ok") {
+        //REQUIRE(result == E_MDNS_OK);
+      //}
 
-      THEN("the TTL will be set") {
-        REQUIRE(cache[0].ttl == 120);
-      }
+      //THEN("there will be a new object in the cache") {
+        //REQUIRE(cache.length() == oldLen + 1);
+      //}
 
-      THEN("the response request object will have the correct IP address object") {
-        REQUIRE(cache[0].ipAddress == IPAddress(192, 168, 1, 2));
-      }
-    }
+      //THEN("the response request object will not be resolved") {
+        //REQUIRE(cache[0].resolved == false);
+      //}
 
-    WHEN("parsing an cname that matches the name in the cache") {
-      Response response(std::string("mqtt.local"));
-      Cache cache;
-      cache.insert(response);
-      int oldLen = cache.length();
+      //THEN("the response request object will have a pointer to a Response object that matches it's data") {
+        //REQUIRE(cache[0].cname->name == cache[1].name);
+      //}
+    //}
+  //}
 
-      UDP Udp = UDP::loadFromFile("fixtures/cname_answer.bin");
-      unsigned len = Udp.parsePacket();
-      unsigned char *packet = (unsigned char *)malloc(sizeof(unsigned char) * len);
+  //GIVEN("a cache with a cname response that will match the name in the cache, where there is a response object that matches the cname pointer") {
+    //Response cname(std::string("mqtt.local"));
+    //Response a(std::string("nas.local"));
+    //Cache cache;
+    //cache.insert(cname);
+    //cache.insert(a);
+    //int oldLen = cache.length();
 
-      Udp.read(packet, len);
-      unsigned int offset = 12;
 
-      MDNS_RESULT result = Answer::resolve(packet, len, &offset, cache);
+      //MDNS_RESULT result = Answer::resolve(packet, len, &offset, cache);
 
-      THEN("result should be ok") {
-        REQUIRE(result == E_MDNS_OK);
-      }
+      //THEN("result should be ok") {
+        //REQUIRE(result == E_MDNS_OK);
+      //}
 
-      THEN("there will be a new object in the cache") {
-        REQUIRE(cache.length() == oldLen + 1);
-      }
+      //THEN("there will be a new object in the cache") {
+        //REQUIRE(cache.length() == oldLen);
+      //}
 
-      THEN("the response request object will not be resolved") {
-        REQUIRE(cache[0].resolved == false);
-      }
+      //THEN("the response request object will not be resolved") {
+        //REQUIRE(cache[0].resolved == false);
+      //}
 
-      THEN("the response request object will have a pointer to a Response object that matches it's data") {
-        REQUIRE(cache[0].cname->name == cache[1].name);
-      }
-    }
+      //THEN("the response request object will have a pointer to a Response object that matches it's data") {
+        //REQUIRE(cache[0].cname->name == response2.name);
+      //}
+    //}
 
-    WHEN("parsing an cname that matches the name in the cache, where the cname pointer is already in the cache") {
-      Response response(std::string("mqtt.local"));
-      Response response2(std::string("nas.local"));
-      Cache cache;
-      cache.insert(response);
-      cache.insert(response2);
-      int oldLen = cache.length();
-
-      UDP Udp = UDP::loadFromFile("fixtures/cname_answer.bin");
-      unsigned len = Udp.parsePacket();
-      unsigned char *packet = (unsigned char *)malloc(sizeof(unsigned char) * len);
-
-      Udp.read(packet, len);
-      unsigned int offset = 12;
-
-      MDNS_RESULT result = Answer::resolve(packet, len, &offset, cache);
-
-      THEN("result should be ok") {
-        REQUIRE(result == E_MDNS_OK);
-      }
-
-      THEN("there will be a new object in the cache") {
-        REQUIRE(cache.length() == oldLen);
-      }
-
-      THEN("the response request object will not be resolved") {
-        REQUIRE(cache[0].resolved == false);
-      }
-
-      THEN("the response request object will have a pointer to a Response object that matches it's data") {
-        REQUIRE(cache[0].cname->name == response2.name);
-      }
-    }
-
-  }
-}
+  //}
+//}
 
 SCENARIO("mDNS packet with a question is received.") {
   GIVEN("the packet has questions") {
