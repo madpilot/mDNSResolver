@@ -173,8 +173,8 @@ SCENARIO("resolving a packet") {
               REQUIRE(cache.length() == 2);
             }
 
-            THEN("the Response object will point to the old Response object") {
-              REQUIRE(*cache[0].cname == cache[1]);
+            THEN("the Response object will point to NULL") {
+              REQUIRE(cache[0].cname == NULL);
             }
 
             THEN("the Response object will be resolved") {

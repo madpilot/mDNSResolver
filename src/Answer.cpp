@@ -71,15 +71,16 @@ namespace mDNSResolver {
       if(cnameIndex == -1) {
         r = new Response(cname);
         cache.insert(*r);
+        cache[index].cname = r;
       } else {
         r = &cache[cnameIndex];
         if(r->resolved) {
           cache[index].ipAddress = r->ipAddress;
           cache[index].resolved = true;
+        } else {
+          cache[index].cname = r;
         }
       }
-
-      cache[index].cname = r;
     } else {
       // Not an A record or a CNAME. Ignore.
     }
