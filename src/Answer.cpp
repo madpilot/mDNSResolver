@@ -63,8 +63,22 @@ namespace mDNSResolver {
       char *data = (char *)malloc(sizeof(char) * (dataLen - 1));
       // This will fragment...
       parseName(&data, assembled, dataLen - 1);
-      Response *r = new Response(std::string(data));
-      cache.insert(*r);
+
+      std::string cname = std::string(data);
+      int cnameIndex = cache.search(cname);
+
+      Response *r;
+      if(cnameIndex == -1) {
+        r = new Response(cname);
+        cache.insert(*r);
+      } else {
+        r = &cache[cnameIndex];
+        if(r->resolved) {
+          cache[index].ipAddress = r->ipAddress;
+          cache[index].resolved = true;
+        }
+      }
+
       cache[index].cname = r;
     } else {
       // Not an A record or a CNAME. Ignore.
