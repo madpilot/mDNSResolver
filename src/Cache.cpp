@@ -102,7 +102,18 @@ namespace mDNSResolver {
     return oldestIndex;
   }
 
+  void Cache::removeCname(int index) {
+    Response *response = &this->list[index];
+
+    for(int i = 0; i < length(); i++) {
+      if(this->list[i].cname == response) {
+        this->list[i].cname = NULL;
+      }
+    }
+  }
+
   void Cache::remove(int index) {
+    removeCname(index);
     this->list[index] = this->list[this->size - 1];
     this->size -= 1;
   }

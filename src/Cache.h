@@ -23,6 +23,7 @@ namespace mDNSResolver {
   private:
     int oldest();
     void remove(int index);
+    void removeCname(int index);
 
     Response list[MDNS_RESOLVER_MAX_CACHE];
     int size;
