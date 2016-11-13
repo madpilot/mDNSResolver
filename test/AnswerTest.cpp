@@ -191,6 +191,36 @@ SCENARIO("resolving a packet") {
       }
     }
   }
+
+  GIVEN("a full cache") {
+    Cache cache;
+
+    Response response1("test1.local", 10);
+    Response response2("mqtt.local", 1);
+    Response response3("test2.local", 10);
+    Response response4("test3.local", 10);
+
+    cache.insert(response1);
+    cache.insert(response2);
+    cache.insert(response3);
+    cache.insert(response4);
+
+    GIVEN("a packet with a CNAME that matches the lowest TTL item in the cache") {
+      unsigned int offset = 12;
+
+      WHEN("parsing") {
+        MDNS_RESULT result = Answer::resolve(packet, len, &offset, cache);
+
+        THEN("the CNAME entry should be removed") {
+          REQUIRE(cache.search("mqtt.local") == -1);
+        }
+
+        THEN("the A record he CNAME pointed to should be entered") {
+          REQUIRE(cache.search("nas.local") != -1);
+        }
+      }
+    }
+  }
 }
 
 SCENARIO("mDNS packet with a question is received.") {
