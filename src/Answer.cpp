@@ -4,6 +4,24 @@
 #include <stdlib.h>
 
 namespace mDNSResolver {
+  MDNS_RESULT Answer::resolveAName(unsigned char *buffer, unsigned int len, unsigned int *offset, Response& response, long ttl, int dataLen) {
+    if(dataLen == 4) {
+      unsigned int a = (unsigned int)*(buffer + (*offset)++);
+      unsigned int b = (unsigned int)*(buffer + (*offset)++);
+      unsigned int c = (unsigned int)*(buffer + (*offset)++);
+      unsigned int d = (unsigned int)*(buffer + (*offset)++);
+
+      response.resolved = true;
+      response.ttl = ttl;
+      response.ipAddress = IPAddress(a, b, c, d);
+
+    } else {
+      (*offset) += dataLen;
+    }
+
+    return E_MDNS_OK;
+  }
+
   MDNS_RESULT Answer::resolve(unsigned char *buffer, unsigned int len, unsigned int* offset, Cache& cache) {
     char* assembled = (char *)malloc(sizeof(char) * MDNS_MAX_NAME_LEN);
     int nameLen = Answer::assembleName(buffer, len, offset, &assembled);
@@ -23,19 +41,7 @@ namespace mDNSResolver {
 
     int index = cache.search(name);
     if(type == MDNS_A_RECORD && index != -1) {
-      if(dataLen == 4) {
-        unsigned int a = (unsigned int)*(buffer + (*offset)++);
-        unsigned int b = (unsigned int)*(buffer + (*offset)++);
-        unsigned int c = (unsigned int)*(buffer + (*offset)++);
-        unsigned int d = (unsigned int)*(buffer + (*offset)++);
-
-        cache[index].resolved = true;
-        cache[index].ttl = ttl;
-        cache[index].ipAddress = IPAddress(a, b, c, d);
-
-      } else {
-        (*offset) += dataLen;
-      }
+      resolveAName(buffer, len, offset, cache[index], ttl, dataLen);
     } else if(type == MDNS_CNAME_RECORD && index != -1) {
       unsigned int dataOffset = (*offset);
       (*offset) += dataLen;
