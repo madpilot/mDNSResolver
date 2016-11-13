@@ -39,7 +39,9 @@ namespace mDNSResolver {
       }
     }
 
-    return E_MDNS_OK;
+    resolveCnames(cache);
+
+    return answerResult;
   }
 
   MDNS_RESULT Answer::resolveAName(unsigned char *buffer, unsigned int len, unsigned int *offset, Response& response, long ttl, int dataLen) {
@@ -111,11 +113,10 @@ namespace mDNSResolver {
       cache[cacheIndex].cname = r;
     } else {
       // Not an A record or a CNAME. Ignore.
+      (*offset) += dataLen;
     }
 
     free(assembled);
-
-    resolveCnames(cache);
     return E_MDNS_OK;
   }
 

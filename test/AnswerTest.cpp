@@ -112,8 +112,41 @@ SCENARIO("resolving a packet") {
       WHEN("parsing a complete CNAME packet") {
         MDNS_RESULT result = Answer::process(packet, len, cache);
 
-        THEN("Result should be ok") {
+        THEN("result should be ok") {
           REQUIRE(result == E_MDNS_OK);
+        }
+
+        THEN("the cache should have a new item in it") {
+          REQUIRE(cache.length() == 2);
+        }
+
+        THEN("the resolved A-record will be in the cache") {
+          REQUIRE(cache[1].name == "nas.local");
+        }
+
+        THEN("the A-record will be resolved") {
+          REQUIRE(cache[1].resolved == true);
+        }
+
+        THEN("the A-record will have the correct IP address") {
+          int a = 1;
+          REQUIRE(cache[1].ipAddress == IPAddress(192, 168, 1, 2));
+        }
+
+        THEN("the A-record will have the correct TTL") {
+          REQUIRE(cache[1].ttl == 120);
+        }
+
+        THEN("the CNAME-record will be resolved") {
+          REQUIRE(cache[0].resolved == true);
+        }
+
+        THEN("the CNAME-record will have the correct IP address") {
+          REQUIRE(cache[0].ipAddress == IPAddress(192, 168, 1, 2));
+        }
+
+        THEN("the CNAME-record will have the correct TTL") {
+          REQUIRE(cache[0].ttl == 60);
         }
       }
 
