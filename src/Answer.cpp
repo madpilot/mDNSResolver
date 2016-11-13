@@ -101,16 +101,13 @@ namespace mDNSResolver {
       parseName(&data, assembled, dataLen - 1);
       int cnameIndex = cache.search(data);
 
-      Response *r;
       if(cnameIndex == -1) {
-        r = new Response(std::string(data));
-        cache.insert(*r);
-      } else {
-        r = &cache[cnameIndex];
+        cache.insert(Response(std::string(data)));
+        cnameIndex = cache.search(data);
       }
 
       free(data);
-      cache[cacheIndex].cname = r;
+      cache[cacheIndex].cname = &cache[cnameIndex];
     } else {
       // Not an A record or a CNAME. Ignore.
       (*offset) += dataLen;

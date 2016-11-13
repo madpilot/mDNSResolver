@@ -129,7 +129,6 @@ SCENARIO("resolving a packet") {
         }
 
         THEN("the A-record will have the correct IP address") {
-          int a = 1;
           REQUIRE(cache[1].ipAddress == IPAddress(192, 168, 1, 2));
         }
 
@@ -171,10 +170,6 @@ SCENARIO("resolving a packet") {
           THEN("the Response object cname pointer's name will match the data payload") {
             REQUIRE(cache[0].cname->name == std::string("nas.local"));
           }
-
-          THEN("the response request object will not resolved") {
-            REQUIRE(cache[0].resolved == false);
-          }
         }
 
         WHEN("the pointed name is in the cache") {
@@ -195,10 +190,6 @@ SCENARIO("resolving a packet") {
             THEN("the Response object will point to the old Response object") {
               REQUIRE(*cache[0].cname == cache[1]);
             }
-
-            THEN("the response request object will not resolved") {
-              REQUIRE(cache[0].resolved == false);
-            }
           }
 
           WHEN("the pointed object is resolved") {
@@ -212,18 +203,6 @@ SCENARIO("resolving a packet") {
 
             THEN("the cache will not expand") {
               REQUIRE(cache.length() == 2);
-            }
-
-            THEN("the Response object will point to NULL") {
-              REQUIRE(cache[0].cname == NULL);
-            }
-
-            THEN("the Response object will be resolved") {
-              REQUIRE(cache[0].resolved == true);
-            }
-
-            THEN("the Response object will have a matching IP address") {
-              REQUIRE(cache[0].ipAddress == IPAddress(192, 168, 1, 2));
             }
           }
 
