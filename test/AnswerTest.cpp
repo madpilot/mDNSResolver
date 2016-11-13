@@ -195,10 +195,10 @@ SCENARIO("resolving a packet") {
   GIVEN("a full cache") {
     Cache cache;
 
-    Response response1("test1.local", 10);
+    Response response1("test1.local", 255);
     Response response2("mqtt.local", 1);
-    Response response3("test2.local", 10);
-    Response response4("test3.local", 10);
+    Response response3("test2.local", 255);
+    Response response4("test3.local", 255);
 
     cache.insert(response1);
     cache.insert(response2);
@@ -215,7 +215,7 @@ SCENARIO("resolving a packet") {
           REQUIRE(cache.search("mqtt.local") == -1);
         }
 
-        THEN("the A record he CNAME pointed to should be entered") {
+        THEN("the A record the CNAME pointed to should be entered") {
           REQUIRE(cache.search("nas.local") != -1);
         }
       }

@@ -44,6 +44,9 @@ namespace mDNSResolver {
     if(type == MDNS_A_RECORD && cacheIndex != -1) {
       resolveAName(buffer, len, offset, cache[cacheIndex], ttl, dataLen);
     } else if(type == MDNS_CNAME_RECORD && cacheIndex != -1) {
+      cache[cacheIndex].resolved = false;
+      cache[cacheIndex].ttl = ttl;
+
       unsigned int dataOffset = (*offset);
       (*offset) += dataLen;
       dataLen = Answer::assembleName(buffer, len, &dataOffset, &assembled, dataLen);
@@ -56,30 +59,25 @@ namespace mDNSResolver {
       char *data = (char *)malloc(sizeof(char) * (dataLen - 1));
       // This will fragment...
       parseName(&data, assembled, dataLen - 1);
-
-      std::string cname = std::string(data);
-      int cnameIndex = cache.search(cname);
+      int cnameIndex = cache.search(data);
 
       Response *r;
       if(cnameIndex == -1) {
-        r = new Response(cname);
+        r = new Response(std::string(data));
         cache.insert(*r);
-        cache[cacheIndex].cname = r;
       } else {
         r = &cache[cnameIndex];
-        if(r->resolved) {
-          cache[cacheIndex].ipAddress = r->ipAddress;
-          cache[cacheIndex].resolved = true;
-        } else {
-          cache[cacheIndex].cname = r;
-        }
       }
+
+      free(data);
+      cache[cacheIndex].cname = r;
     } else {
       // Not an A record or a CNAME. Ignore.
     }
 
     free(assembled);
 
+    resolveCnames(cache);
     return E_MDNS_OK;
   }
 
@@ -189,5 +187,15 @@ namespace mDNSResolver {
     }
 
     return E_MDNS_OK;
+  }
+
+  MDNS_RESULT Answer::resolveCnames(Cache &cache) {
+    for(int i = 0; i < cache.length(); i++) {
+      if(cache[i].cname != NULL && cache[i].cname->resolved) {
+        cache[i].ipAddress = cache[i].cname->ipAddress;
+        cache[i].resolved = true;
+        cache[i].cname = NULL;
+      }
+    }
   }
 };

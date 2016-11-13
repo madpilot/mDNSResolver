@@ -22,6 +22,7 @@ namespace mDNSResolver {
     static MDNS_RESULT skipQuestions(unsigned char* buffer, unsigned int len, unsigned int* offset);
     static MDNS_RESULT parseName(char** name, const char* mapped, unsigned int len);
     static MDNS_RESULT resolveAName(unsigned char *buffer, unsigned int len, unsigned int *offset, Response& response, long ttl, int dataLen);
+    static MDNS_RESULT resolveCnames(Cache &cache);
   };
 };
 
