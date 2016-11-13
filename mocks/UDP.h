@@ -1,6 +1,8 @@
 #ifndef UDP_H
 #define UDP_H
 
+#include "IPAddress.h"
+
 class UDP {
 public:
   UDP();
@@ -12,17 +14,26 @@ public:
 
   void setReadBuffer(unsigned char *buffer, int length);
 
-  void begin(IPAddress dest, int port);
-  void beginMulticast(IPAddress src, IPAddress dest, int port);
-  void beginPacketMulticast(IPAddress dest, int port, IPAddress src, int timeout);
-  void endPacket();
+  uint8_t begin(uint16_t port);
+  void stop();
+  uint8_t beginMulticast(IPAddress interfaceAddr, IPAddress multicast, uint16_t port);
+  int beginPacket(IPAddress ip, uint16_t port);
+  int beginPacket(const char *host, uint16_t port);
+  int beginPacketMulticast(IPAddress multicastAddress, uint16_t port, IPAddress interfaceAddress, int ttl = 1);
+  int endPacket();
 
   int readLength();
   int writeLength();
 
-  void read(unsigned char *buffer, int length);
-  void write(unsigned char *buffer, int length);
-  unsigned int parsePacket();
+  int read();
+  int read(unsigned char* buffer, size_t len);
+  int read(char* buffer, size_t len) { return read((unsigned char*)buffer, len); };
+  int peek();
+  void flush();
+
+  size_t write(uint8_t);
+  size_t write(const uint8_t *buffer, size_t size);
+  int parsePacket();
 
   unsigned char *readBuffer;
   unsigned char *writeBuffer;

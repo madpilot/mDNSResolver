@@ -1,3 +1,5 @@
+#ifndef IPADDRESS_H
+#define IPADDRESS_H
 #include <string>
 
 class IPAddress {
@@ -13,3 +15,4 @@ private:
   unsigned int c;
   unsigned int d;
 };
+#endif
