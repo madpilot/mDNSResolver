@@ -25,18 +25,20 @@
 namespace mDNSResolver {
   class Resolver {
     public:
-      Resolver(IPAddress localIP);
+      Resolver(UDP udp);
       ~Resolver();
+
       bool search(std::string name);
       IPAdress address();
     private:
+      UDP udp;
+      IPAddress localIP;
       void loop();
       bool init;
       long timeout;
       int attempts;
       void query(std::string &name);
       IPAddress lastIPAddress;
-      UDP udp;
   };
 };
 #endif

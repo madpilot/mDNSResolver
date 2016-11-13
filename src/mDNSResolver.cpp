@@ -8,9 +8,22 @@ namespace mDNSResolver {
     attempts = 0;
     found = false;
     this->udp = udp;
+    this->localIP = IPAddress(127, 0, 0, 1);
+  }
+
+  Resolver::Resolver(UDP udp, IPAddress localIP) {
+    timeout = 0;
+    attempts = 0;
+    found = false;
+    this->udp = udp;
+    this->localIP = localIP;
   }
 
   Resolver::~Resolver() {}
+
+  void setLocalIP(IPAddress localIP) {
+    this->localIP = localIP;
+  }
 
   bool Resolver::search(std::string name) {
     cache.expire();
@@ -53,7 +66,7 @@ namespace mDNSResolver {
 
   void Resolver::query(std::string& name) {
     Query query(name);
-    udp.beginPacketMulticast(MDNS_BROADCAST_IP, MDNS_PORT, WiFi.localIP(), UDP_TIMEOUT);
+    udp.beginPacketMulticast(MDNS_BROADCAST_IP, MDNS_PORT, localIP, UDP_TIMEOUT);
     query.sendPacket(udp);
     udp.endPacket();
   }
@@ -65,7 +78,7 @@ namespace mDNSResolver {
     if(len > 0) {
       if(!init) {
         init = true;
-        udp.beginMulticast(WiFi.localIP(), MDNS_BROADCAST_IP, MDNS_PORT);
+        udp.beginMulticast(localIP, MDNS_BROADCAST_IP, MDNS_PORT);
       }
 
       byte *buffer = (byte *)malloc(sizeof(byte) * len);
