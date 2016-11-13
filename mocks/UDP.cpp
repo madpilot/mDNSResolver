@@ -24,6 +24,22 @@ UDP::~UDP() {
   }
 }
 
+void begin(IPAddress dest, int port) {
+
+}
+
+void beginMulticast(IPAddress src, IPAddress dest, int port) {
+
+}
+
+void beginMulticast(IPAddress src, IPAddress dest, int port, int timeout) {
+
+}
+
+void endPacket() {
+
+}
+
 UDP UDP::loadFromFile(const char *path) {
   unsigned char *source = NULL;
   UDP udp;

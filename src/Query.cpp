@@ -8,7 +8,7 @@ namespace mDNSResolver {
   Query::~Query() {}
 
   // If we pass in a UDP proxy, we can dynamically allocate the
-  // memory without fee of fragmentation, and don't risk losing 
+  // memory without fee of fragmentation, and don't risk losing
   // the reference if this object disappears
   void Query::sendPacket(UDP *socket) {
     int bufferLength = this->name.length() + 18;
@@ -26,7 +26,7 @@ namespace mDNSResolver {
 
     int bufferIndex = 12;
     bufferIndex = buildDNSName(buffer, bufferIndex);
-    
+
     int qtype = 0x01;
     int qclass = 0x01;
 
@@ -39,7 +39,7 @@ namespace mDNSResolver {
 
   int Query::buildDNSName(unsigned char *buffer, unsigned int bufferIndex) {
     int wordstart = 0, wordend = 0;
-    
+
     do {
       if(this->name[wordend] == '.' || this->name[wordend] == '\0') {
         const int wordlen = wordend - wordstart;
@@ -48,16 +48,16 @@ namespace mDNSResolver {
         for(int i = wordstart; i < wordend; i++) {
           buffer[bufferIndex++] = this->name[i];
         }
-        
+
         if(this->name[wordend] == '.') {
           wordend++;
         }
         wordstart = wordend;
       }
-      
+
       wordend++;
     } while(this->name[wordstart] != '\0');
-    
+
     return bufferIndex;
   }
 };

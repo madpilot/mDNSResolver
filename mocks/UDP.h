@@ -12,6 +12,11 @@ public:
 
   void setReadBuffer(unsigned char *buffer, int length);
 
+  void begin(IPAddress dest, int port);
+  void beginMulticast(IPAddress src, IPAddress dest, int port);
+  void beginPacketMulticast(IPAddress dest, int port, IPAddress src, int timeout);
+  void endPacket();
+
   int readLength();
   int writeLength();
 
