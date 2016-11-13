@@ -33,16 +33,17 @@ namespace mDNSResolver {
 
     char *name = (char *)malloc(sizeof(char) * nameLen);
     parseName(&name, assembled, strlen(assembled));
+    int cacheIndex = cache.search(name);
+    free(name);
 
     unsigned int type = (buffer[(*offset)++] << 8) + buffer[(*offset)++];
     unsigned int aclass = (buffer[(*offset)++] << 8) + buffer[(*offset)++];
     unsigned long ttl = (buffer[(*offset)++] << 24) + (buffer[(*offset)++] << 16) + (buffer[(*offset)++] << 8) + buffer[(*offset)++];
     unsigned int dataLen = (buffer[(*offset)++] << 8) + buffer[(*offset)++];
 
-    int index = cache.search(name);
-    if(type == MDNS_A_RECORD && index != -1) {
-      resolveAName(buffer, len, offset, cache[index], ttl, dataLen);
-    } else if(type == MDNS_CNAME_RECORD && index != -1) {
+    if(type == MDNS_A_RECORD && cacheIndex != -1) {
+      resolveAName(buffer, len, offset, cache[cacheIndex], ttl, dataLen);
+    } else if(type == MDNS_CNAME_RECORD && cacheIndex != -1) {
       unsigned int dataOffset = (*offset);
       (*offset) += dataLen;
       dataLen = Answer::assembleName(buffer, len, &dataOffset, &assembled, dataLen);
@@ -63,14 +64,14 @@ namespace mDNSResolver {
       if(cnameIndex == -1) {
         r = new Response(cname);
         cache.insert(*r);
-        cache[index].cname = r;
+        cache[cacheIndex].cname = r;
       } else {
         r = &cache[cnameIndex];
         if(r->resolved) {
-          cache[index].ipAddress = r->ipAddress;
-          cache[index].resolved = true;
+          cache[cacheIndex].ipAddress = r->ipAddress;
+          cache[cacheIndex].resolved = true;
         } else {
-          cache[index].cname = r;
+          cache[cacheIndex].cname = r;
         }
       }
     } else {
