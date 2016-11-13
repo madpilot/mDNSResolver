@@ -4,6 +4,44 @@
 #include <stdlib.h>
 
 namespace mDNSResolver {
+  MDNS_RESULT Answer::process(unsigned char* buffer, unsigned int len, Cache& cache) {
+    if((buffer[2] & 0b10000000) != 0b10000000) {
+      // Not an answer packet
+      return E_MDNS_OK;
+    }
+
+    if(buffer[2] & 0b00000010) {
+      // Truncated - we don't know what to do with these
+      return E_MDNS_TRUNCATED;
+    }
+
+    if (buffer[3] & 0b00001111) {
+      return E_MDNS_PACKET_ERROR;
+    }
+
+    unsigned int answerCount = (buffer[6] << 8) + buffer[7];
+    if(answerCount == 0) {
+      return E_MDNS_OK;
+    }
+
+    unsigned int offset = 0;
+
+    MDNS_RESULT questionResult = skipQuestions(buffer, len, &offset);
+    if(questionResult != E_MDNS_OK) {
+      return questionResult;
+    }
+
+    MDNS_RESULT answerResult;
+    for(int i = 0; i < answerCount; i++) {
+      answerResult = resolve(buffer, len, &offset, cache);
+      if(answerResult != E_MDNS_OK) {
+        return answerResult;
+      }
+    }
+
+    return E_MDNS_OK;
+  }
+
   MDNS_RESULT Answer::resolveAName(unsigned char *buffer, unsigned int len, unsigned int *offset, Response& response, long ttl, int dataLen) {
     if(dataLen == 4) {
       unsigned int a = (unsigned int)*(buffer + (*offset)++);
@@ -28,7 +66,7 @@ namespace mDNSResolver {
 
     if(nameLen == -1 * E_MDNS_POINTER_OVERFLOW) {
       free(assembled);
-      return nameLen;
+      return -1 * nameLen;
     }
 
     char *name = (char *)malloc(sizeof(char) * nameLen);
@@ -53,7 +91,7 @@ namespace mDNSResolver {
 
       if(dataLen == -1 * E_MDNS_POINTER_OVERFLOW) {
         free(assembled);
-        return dataLen;
+        return -1 * dataLen;
       }
 
       char *data = (char *)malloc(sizeof(char) * (dataLen - 1));

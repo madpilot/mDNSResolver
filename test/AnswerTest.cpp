@@ -109,6 +109,14 @@ SCENARIO("resolving a packet") {
       Response response(std::string("mqtt.local"));
       cache.insert(response);
 
+      WHEN("parsing a complete CNAME packet") {
+        MDNS_RESULT result = Answer::process(packet, len, cache);
+
+        THEN("Result should be ok") {
+          REQUIRE(result == E_MDNS_OK);
+        }
+      }
+
       WHEN("parsing an CNAME-record answer with a name that matches the Response object") {
         unsigned int offset = 12;
 
