@@ -12,23 +12,11 @@
 namespace mDNSResolver {
   class Answer {
   public:
-    Answer();
-    ~Answer();
     static MDNS_RESULT resolve(unsigned char *buffer, unsigned int len, unsigned int *offset, Cache& cache);
-    static MDNS_RESULT buildResponse(unsigned char* buffer, unsigned int len, Response& response);
-
-    char *name;
-    unsigned int type;
-    unsigned int aclass;
-    unsigned int cacheflush;
-    unsigned long ttl;
-    unsigned int len;
-    unsigned char *data;
 
 #ifndef TEST
   private:
 #endif
-    static MDNS_RESULT parseAnswer(unsigned char* buffer, unsigned int len, unsigned int *offset, Answer* answer);
     static int assembleName(unsigned char *buffer, unsigned int len, unsigned int *offset, char **name, unsigned int maxlen);
     static int assembleName(unsigned char *buffer, unsigned int len, unsigned int *offset, char **name);
     static MDNS_RESULT skipQuestions(unsigned char* buffer, unsigned int len, unsigned int* offset);

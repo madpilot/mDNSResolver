@@ -4,20 +4,6 @@
 #include <stdlib.h>
 
 namespace mDNSResolver {
-  Answer::Answer() {
-    this->name = NULL;
-    this->data = NULL;
-  }
-
-  Answer::~Answer() {
-    if(this->name) {
-      free(this->name);
-    }
-    if(this->data) {
-      free(this->data);
-    }
-  }
-
   MDNS_RESULT Answer::resolve(unsigned char *buffer, unsigned int len, unsigned int* offset, Cache& cache) {
     char* assembled = (char *)malloc(sizeof(char) * MDNS_MAX_NAME_LEN);
     int nameLen = Answer::assembleName(buffer, len, offset, &assembled);
@@ -90,100 +76,6 @@ namespace mDNSResolver {
     return E_MDNS_OK;
   }
 
-  MDNS_RESULT Answer::parseAnswer(unsigned char* buffer, unsigned int len, unsigned int* offset, Answer* answer) {
-    char* assembled = (char *)malloc(sizeof(char) * MDNS_MAX_NAME_LEN);
-    int nameLen = Answer::assembleName(buffer, len, offset, &assembled);
-
-    if(nameLen == -1 * E_MDNS_POINTER_OVERFLOW) {
-      free(assembled);
-      return nameLen;
-    }
-
-    answer->name = (char *)malloc(sizeof(char) * nameLen);
-    parseName(&answer->name, assembled, strlen(assembled));
-    answer->type = (buffer[(*offset)++] << 8) + buffer[(*offset)++];
-
-    unsigned int aclass = (buffer[(*offset)++] << 8) + buffer[(*offset)++];
-    answer->cacheflush = aclass >> 15;
-    answer->aclass = aclass & 0x7f;
-
-    answer->ttl = (buffer[(*offset)++] << 24) + (buffer[(*offset)++] << 16) + (buffer[(*offset)++] << 8) + buffer[(*offset)++];
-    answer->len = (buffer[(*offset)++] << 8) + buffer[(*offset)++];
-
-    if(answer->type == MDNS_A_RECORD) {
-      answer->data = (unsigned char *)malloc(sizeof(unsigned char) * answer->len);
-      memcpy(answer->data, buffer + (*offset), answer->len);
-      (*offset) += answer->len;
-    } else if(answer->type == MDNS_CNAME_RECORD) {
-      unsigned int dataOffset = (*offset);
-      (*offset) += answer->len;
-      int dataLen = Answer::assembleName(buffer, len, &dataOffset, &assembled, answer->len);
-
-      if(dataLen == -1 * E_MDNS_POINTER_OVERFLOW) {
-        free(assembled);
-        return dataLen;
-      }
-
-      answer->data = (unsigned char *)malloc(sizeof(unsigned char) * (dataLen - 1));
-      answer->len = dataLen - 1;
-
-      // This will fragment...
-      char* d = (char *)answer->data;
-      parseName(&d, assembled, dataLen - 1);
-    } else {
-      // Not an A record or a CNAME. Ignore.
-      answer->len = 0;
-      answer->data = NULL;
-    }
-
-    free(assembled);
-
-    return E_MDNS_OK;
-  }
-
-  // Response should have the name set already
-  MDNS_RESULT Answer::buildResponse(unsigned char* buffer, unsigned int len, Response& response) {
-    if((buffer[2] & 0b10000000) != 0b10000000) {
-      // Not an answer packet
-      return E_MDNS_OK;
-    }
-
-    if(buffer[2] & 0b00000010) {
-      // Truncated - we don't know what to do with these
-      return E_MDNS_TRUNCATED;
-    }
-
-    if (buffer[3] & 0b00001111) {
-      return E_MDNS_PACKET_ERROR;
-    }
-
-    unsigned int answerCount = (buffer[6] << 8) + buffer[7];
-
-    // For this library, we are only interested in packets that contain answers
-    if(answerCount == 0) {
-      return E_MDNS_OK;
-    }
-
-    unsigned int offset = 0;
-
-    MDNS_RESULT questionResult = skipQuestions(buffer, len, &offset);
-    if(questionResult != E_MDNS_OK) {
-      return questionResult;
-    }
-
-    Answer* answers = new Answer[answerCount];
-    for(int i = 0; i < answerCount; i++) {
-      parseAnswer(buffer, len, &offset, answers + i);
-    }
-
-    delete[] answers;
-    return E_MDNS_OK;
-  }
-
-  // Converts a encoded DNS name into a FQDN.
-  // name: pointer to char array where the result will be stored. Needs to have already been allocated. It's allocated length should be len - 1
-  // mapped: The encoded DNS name
-  // len: Length of mapped
   MDNS_RESULT Answer::parseName(char** name, const char* mapped, unsigned int len) {
     unsigned int namePointer = 0;
     unsigned int mapPointer = 0;
