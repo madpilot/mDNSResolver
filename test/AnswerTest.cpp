@@ -13,10 +13,10 @@
 using namespace mDNSResolver;
 
 SCENARIO("resolving a packet") {
-  UDP Udp = UDP::loadFromFile("fixtures/cname_answer.bin");
-  unsigned len = Udp.parsePacket();
+  UDP* Udp = UDP::loadFromFile("fixtures/cname_answer.bin");
+  unsigned len = Udp->parsePacket();
   unsigned char *packet = (unsigned char *)malloc(sizeof(unsigned char) * len);
-  Udp.read(packet, len);
+  Udp->read(packet, len);
 
   GIVEN("an empty cache") {
     Cache cache;
@@ -38,7 +38,6 @@ SCENARIO("resolving a packet") {
         REQUIRE(cache.length() == 0);
       }
     }
-
   }
 
   GIVEN("a cache") {
@@ -241,15 +240,17 @@ SCENARIO("resolving a packet") {
       }
     }
   }
+
+  delete Udp;
 }
 
 SCENARIO("mDNS packet with a question is received.") {
   GIVEN("the packet has questions") {
-    UDP Udp = UDP::loadFromFile("fixtures/question.bin");
-    unsigned len = Udp.parsePacket();
+    UDP* Udp = UDP::loadFromFile("fixtures/question.bin");
+    unsigned len = Udp->parsePacket();
     unsigned char *packet = (unsigned char *)malloc(sizeof(unsigned char) * len);
 
-    Udp.read(packet, len);
+    Udp->read(packet, len);
 
     WHEN("parsing") {
       unsigned int offset = 0;
@@ -264,14 +265,16 @@ SCENARIO("mDNS packet with a question is received.") {
         REQUIRE(offset == 45);
       }
     }
+
+    delete Udp;
   }
 
   GIVEN("the packet is malicious and attempts to overflow the pointer") {
-    UDP Udp = UDP::loadFromFile("fixtures/overflow_question.bin");
-    unsigned len = Udp.parsePacket();
+    UDP* Udp = UDP::loadFromFile("fixtures/overflow_question.bin");
+    unsigned len = Udp->parsePacket();
     unsigned char *packet = (unsigned char *)malloc(sizeof(unsigned char) * len);
 
-    Udp.read(packet, len);
+    Udp->read(packet, len);
 
     WHEN("parsing") {
       unsigned int offset = 0;
@@ -281,6 +284,7 @@ SCENARIO("mDNS packet with a question is received.") {
         REQUIRE(result == E_MDNS_PACKET_ERROR);
       }
     }
+    delete Udp;
   }
 }
 

@@ -19,20 +19,20 @@ UDP::UDP(unsigned char *buffer, int length) {
 }
 
 UDP::~UDP() {
-  if(this->readBuffer != NULL) {
-    free(this->readBuffer);
-    this->readBuffer = NULL;
-  }
+  //if(this->readBuffer != NULL) {
+    //free(this->readBuffer);
+    //this->readBuffer = NULL;
+  //}
 
-  if(this->writeBuffer != NULL) {
-    free(this->writeBuffer);
-    this->writeBuffer = NULL;
-  }
+  //if(this->writeBuffer != NULL) {
+    //free(this->writeBuffer);
+    //this->writeBuffer = NULL;
+  //}
 }
 
-UDP UDP::loadFromFile(const char *path) {
+UDP* UDP::loadFromFile(const char *path) {
   unsigned char *source = NULL;
-  UDP udp;
+  UDP* udp = new UDP;
 
   FILE *fp = fopen(path, "rb");
 
@@ -50,6 +50,7 @@ UDP UDP::loadFromFile(const char *path) {
       return udp;
     }
 
+    // Need to do something more c++ friendly, as this is a memory leak
     source = (unsigned char *)malloc(sizeof(unsigned char) * (bufsize + 1));
     if(fseek(fp, 0L, SEEK_SET) != 0) {
       fprintf(stderr, "ERROR: Unable to see to the beginning of the file: %s\n", path);
@@ -64,7 +65,7 @@ UDP UDP::loadFromFile(const char *path) {
       return udp;
     }
 
-    udp.setReadBuffer(source, len);
+    udp->setReadBuffer(source, len);
     fclose(fp);
     return udp;
   } else {
@@ -75,10 +76,10 @@ UDP UDP::loadFromFile(const char *path) {
 }
 
 void UDP::setReadBuffer(unsigned char *buffer, int length) {
-  if(this->readBuffer != NULL) {
-    free(this->readBuffer);
-    this->readBuffer = NULL;
-  }
+  //if(this->readBuffer != NULL) {
+    //free(this->readBuffer);
+    //this->readBuffer = NULL;
+  //}
 
   this->readBuffer = (unsigned char *)malloc(sizeof(unsigned char) * length);
   memcpy(this->readBuffer, buffer, length);
@@ -136,10 +137,10 @@ size_t UDP::write(uint8_t) {
 }
 
 size_t UDP::write(const uint8_t *buffer, size_t size) {
-  if(this->writeBuffer != NULL) {
-    free(this->writeBuffer);
-    this->writeBuffer = NULL;
-  }
+  //if(this->writeBuffer != NULL) {
+    //free(this->writeBuffer);
+    //this->writeBuffer = NULL;
+  //}
 
   this->writeBuffer = (unsigned char *)malloc(sizeof(unsigned char) * size);
   memcpy(this->writeBuffer, buffer, size);

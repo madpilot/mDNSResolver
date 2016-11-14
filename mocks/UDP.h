@@ -10,7 +10,7 @@ public:
   UDP(unsigned char *packet, int length);
   ~UDP();
 
-  static UDP loadFromFile(const char *path);
+  static UDP* loadFromFile(const char *path);
 
   void setReadBuffer(unsigned char *buffer, int length);
 

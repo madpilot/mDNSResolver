@@ -32,6 +32,13 @@ namespace mDNSResolver {
     found = false;
 
     int index = cache.search(name);
+    if(index == -1) {
+      cache.insert(Response(name));
+    } else if(cache[index].resolved) {
+      found = true;
+      lastIPAddress = cache[index].ipAddress;
+      return true;
+    }
 
     while(attempts < MDNS_ATTEMPTS) {
       long now = millis();

@@ -12,8 +12,8 @@ using namespace mDNSResolver;
 
 SCENARIO("resolving an mDNS name") {
   IPAddress localIP(192, 168, 0, 1);
-  UDP Udp = UDP::loadFromFile("fixtures/cname_answer.bin");
-  Resolver resolver(Udp, localIP);
+  UDP* Udp = UDP::loadFromFile("fixtures/cname_answer.bin");
+  Resolver resolver(*Udp, localIP);
 
   WHEN("searching for a name") {
     GIVEN("a search") {
@@ -44,8 +44,8 @@ SCENARIO("resolving an mDNS name") {
           0x01, // QClass
         };
 
-        for(int i = 0; i < Udp.writeLength(); i++) {
-          REQUIRE(Udp.writeBuffer[i] == expected[i]);
+        for(int i = 0; i < Udp->writeLength(); i++) {
+          REQUIRE(Udp->writeBuffer[i] == expected[i]);
         }
       }
     }
@@ -61,7 +61,7 @@ SCENARIO("resolving an mDNS name") {
     GIVEN("a name that does exist") {
       bool result = resolver.search("mqtt.local");
 
-      THEN("search should return false") {
+      THEN("search should return true") {
         REQUIRE(result == true);
       }
 
@@ -70,4 +70,6 @@ SCENARIO("resolving an mDNS name") {
       }
     }
   }
+
+  delete Udp;
 }
