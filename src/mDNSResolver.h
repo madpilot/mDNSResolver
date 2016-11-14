@@ -2,9 +2,10 @@
 #define MDNS_RESOLVER_h
 
 #include <IPAddress.h>
-#include <WiFi.h>
 #include <UDP.h>
 #include "Cache.h"
+#include "Query.h"
+#include "Answer.h"
 
 #define MDNS_BROADCAST_IP IPAddress(255, 0, 0, 251)
 #define MDNS_PORT         5353
@@ -26,17 +27,19 @@ namespace mDNSResolver {
   class Resolver {
     public:
       Resolver(UDP udp);
+      Resolver(UDP udp, IPAddress localIP);
       ~Resolver();
 
+      void setLocalIP(IPAddress localIP);
       bool search(std::string name);
-      IPAdress address();
+      IPAddress address();
     private:
       UDP udp;
       IPAddress localIP;
       void loop();
+      bool found;
       bool init;
       long timeout;
-      int attempts;
       void query(std::string &name);
       IPAddress lastIPAddress;
   };

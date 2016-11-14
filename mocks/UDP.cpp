@@ -4,23 +4,29 @@
 #include <string.h>
 
 UDP::UDP() {
-  this->readBuffer = 0;
-  this->writeBuffer = 0;
+  this->readBuffer = NULL;
+  this->writeBuffer = NULL;
   this->readBufferLength = 0;
   this->writeBufferLength = 0;
 };
 
 UDP::UDP(unsigned char *buffer, int length) {
+  this->readBuffer = NULL;
+  this->writeBuffer = NULL;
+  this->readBufferLength = 0;
+  this->writeBufferLength = 0;
   this->setReadBuffer(buffer, length);
 }
 
 UDP::~UDP() {
-  if(this->readBuffer) {
+  if(this->readBuffer != NULL) {
     free(this->readBuffer);
+    this->readBuffer = NULL;
   }
 
-  if(this->writeBuffer) {
+  if(this->writeBuffer != NULL) {
     free(this->writeBuffer);
+    this->writeBuffer = NULL;
   }
 }
 
@@ -69,14 +75,38 @@ UDP UDP::loadFromFile(const char *path) {
 }
 
 void UDP::setReadBuffer(unsigned char *buffer, int length) {
-  if(this->readBuffer) {
+  if(this->readBuffer != NULL) {
     free(this->readBuffer);
+    this->readBuffer = NULL;
   }
 
   this->readBuffer = (unsigned char *)malloc(sizeof(unsigned char) * length);
   memcpy(this->readBuffer, buffer, length);
   this->readBufferLength = length;
 }
+
+uint8_t UDP::beginMulticast(IPAddress interfaceAddr, IPAddress multicast, uint16_t port) {
+  return 0;
+}
+
+int UDP::beginPacket(IPAddress ip, uint16_t port) {
+  return 0;
+}
+
+int UDP::beginPacket(const char *host, uint16_t port) {
+  return 0;
+}
+
+int UDP::beginPacketMulticast(IPAddress multicastAddress, uint16_t port, IPAddress interfaceAddress, int ttl) {
+  return 0;
+}
+
+int UDP::endPacket() {
+  return 0;
+}
+
+
+
 
 int UDP::writeLength() {
   return this->writeBufferLength;
@@ -106,8 +136,9 @@ size_t UDP::write(uint8_t) {
 }
 
 size_t UDP::write(const uint8_t *buffer, size_t size) {
-  if(this->writeBuffer) {
+  if(this->writeBuffer != NULL) {
     free(this->writeBuffer);
+    this->writeBuffer = NULL;
   }
 
   this->writeBuffer = (unsigned char *)malloc(sizeof(unsigned char) * size);
