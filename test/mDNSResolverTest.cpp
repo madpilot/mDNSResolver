@@ -13,9 +13,9 @@ using namespace mDNSResolver;
 SCENARIO("resolving an mDNS name") {
   IPAddress localIP(192, 168, 0, 1);
   UDP* Udp = UDP::loadFromFile("fixtures/cname_answer.bin");
-  Resolver resolver(*Udp, localIP);
 
   WHEN("searching for a name") {
+  Resolver resolver(*Udp, localIP);
     GIVEN("a search") {
       resolver.search("test.local");
 
