@@ -33,7 +33,7 @@ namespace mDNSResolver {
 
     int index = cache.search(name);
     if(index == -1) {
-      cache.insert(Response(name));
+      cache.insert(Response(name, 5));
     } else if(cache[index].resolved) {
       found = true;
       lastIPAddress = cache[index].ipAddress;
