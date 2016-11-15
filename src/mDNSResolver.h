@@ -30,6 +30,7 @@ namespace mDNSResolver {
       Resolver(UDP udp, IPAddress localIP);
       ~Resolver();
 
+      std::string resolve(std::string name);
       void setLocalIP(IPAddress localIP);
       bool search(std::string name);
       IPAddress address();

@@ -233,5 +233,6 @@ namespace mDNSResolver {
         cache[i].cname = NULL;
       }
     }
+    return E_MDNS_OK;
   }
 };

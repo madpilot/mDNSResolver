@@ -1,5 +1,5 @@
 build_tests:
-	g++-5 -g -std=c++11 \
+	g++ -g -std=c++11 \
 		test/Runner.cpp \
 		test/QueryTest.cpp        src/Query.cpp \
 		test/CacheTest.cpp        src/Cache.cpp \

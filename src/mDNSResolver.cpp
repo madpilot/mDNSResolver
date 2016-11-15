@@ -25,6 +25,16 @@ namespace mDNSResolver {
     this->localIP = localIP;
   }
 
+  std::string Resolver::resolve(std::string name) {
+    if(search(name)) {
+      printf("Found\n");
+      return lastIPAddress.toString();
+    } else {
+      printf("Not found\n");
+      return name;
+    }
+  }
+
   bool Resolver::search(std::string name) {
     cache.expire();
 
@@ -69,6 +79,7 @@ namespace mDNSResolver {
       return lastIPAddress;
     } else {
       assert("search() must be called first, and must have returned true.");
+      return IPAddress(0, 0, 0, 0);
     }
   }
 
