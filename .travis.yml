@@ -1,4 +1,4 @@
 language: cpp
 script: make ci
 compiler:
-  - gcc
+  - clang
