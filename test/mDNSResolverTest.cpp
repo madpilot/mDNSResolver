@@ -15,7 +15,7 @@ SCENARIO("resolving an mDNS name") {
   UDP* Udp = UDP::loadFromFile("fixtures/cname_answer.bin");
 
   WHEN("searching for a name") {
-    Resolver resolver(*Udp, localIP);
+  Resolver resolver(*Udp, localIP);
     GIVEN("a search") {
       resolver.search("test.local");
 
@@ -51,7 +51,6 @@ SCENARIO("resolving an mDNS name") {
     }
 
     GIVEN("a name that does not exist") {
-      Resolver resolver(*Udp, localIP);
       bool result = resolver.search("test.local");
 
       THEN("search should return false") {
@@ -60,7 +59,6 @@ SCENARIO("resolving an mDNS name") {
     }
 
     GIVEN("a name that does exist") {
-      Resolver resolver(*Udp, localIP);
       bool result = resolver.search("mqtt.local");
 
       THEN("search should return true") {
