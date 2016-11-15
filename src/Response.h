@@ -18,6 +18,7 @@ namespace mDNSResolver {
     long ttl;
     bool resolved;
     IPAddress ipAddress;
+    Response* cname;
 
     bool operator==(const Response& response);
   };

@@ -1,5 +1,11 @@
-#define MDNS_MAX_NAME_LEN                 255
+#ifndef MDNS_CONSTANTS_h
+#define MDNS_CONSTANTS_h
+
+#ifndef MDNS_RESOLVER_MAX_CACHE
 #define MDNS_RESOLVER_MAX_CACHE           4
+#endif
+
+#define MDNS_MAX_NAME_LEN                 255
 
 #define E_MDNS_OK                         0x20
 #define E_MDNS_TOO_BIG                    0x21
@@ -13,3 +19,4 @@
 #define MDNS_CNAME_RECORD                 0x05
 
 #define MDNS_RESULT                       unsigned int
+#endif

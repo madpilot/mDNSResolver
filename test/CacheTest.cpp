@@ -82,6 +82,20 @@ SCENARIO("DNS responses are stored in a Cache") {
         }
       }
     }
+
+    GIVEN("an item that references another item") {
+      Response r3("response3.local", 1);
+      r3.cname = &cache[cache.search(r2)];
+      cache.insert(r3);
+
+      WHEN("Removing the referenced item") {
+        cache.remove(r2);
+
+        THEN("The reference will be NULL") {
+          REQUIRE(cache[cache.search(r3)].cname == NULL);
+        }
+      }
+    }
   }
 
   GIVEN("A full cache") {

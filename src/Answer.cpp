@@ -4,9 +4,7 @@
 #include <stdlib.h>
 
 namespace mDNSResolver {
-  Answer::Answer() {}
-
-  MDNS_RESULT Answer::parse(unsigned char* buffer, unsigned int len) {
+  MDNS_RESULT Answer::process(unsigned char* buffer, unsigned int len, Cache& cache) {
     if((buffer[2] & 0b10000000) != 0b10000000) {
       // Not an answer packet
       return E_MDNS_OK;
@@ -22,8 +20,6 @@ namespace mDNSResolver {
     }
 
     unsigned int answerCount = (buffer[6] << 8) + buffer[7];
-
-    // For this library, we are only interested in packets that contain answers
     if(answerCount == 0) {
       return E_MDNS_OK;
     }
@@ -35,50 +31,92 @@ namespace mDNSResolver {
       return questionResult;
     }
 
-    //for(int i = 0; i < answerCount; i++) {
-      //Answer answer();
+    MDNS_RESULT answerResult;
+    for(int i = 0; i < answerCount; i++) {
+      answerResult = resolve(buffer, len, &offset, cache);
+      if(answerResult != E_MDNS_OK) {
+        return answerResult;
+      }
+    }
 
-      //if(parseAnswer(buffer, len, &offset, &answer) == E_MDNS_OK) {
-        //int resultIndex = search(answer.name);
-        //if(resultIndex != -1) {
-          //if(answer.type == 0x01) {
-            //_cache[resultIndex].ipAddress = IPAddress((int)answer.data[0], (int)answer.data[1], (int)answer.data[2], (int)answer.data[3]);
-            //_cache[resultIndex].ttl = answer.ttl;
-            //_cache[resultIndex].waiting = false;
-          //} else if(answer.type == 0x05) {
-            //// If data is already in there, copy the data
-            //int cnameIndex = search((char *)answer.data);
+    resolveCnames(cache);
 
-            //if(cnameIndex != -1) {
-              //_cache[resultIndex].ipAddress = _cache[cnameIndex].ipAddress;
-              //_cache[resultIndex].waiting = false;
-              //_cache[resultIndex].ttl = answer.ttl;
-            //} else {
-              //Response r = buildResponse((char *)answer.data);
-              //insert(r);
-            //}
-          //}
-        //}
-
-        //free(answer.data);
-        //free(answer.name);
-        //return E_MDNS_OK;
-      //} else {
-        //if(answer.data) {
-          //free(answer.data);
-        //}
-        //if(answer.name) {
-          //free(answer.name);
-        //}
-        //return E_MDNS_PARSING_ERROR;
-      //}
-    //}
+    return answerResult;
   }
 
-  // Converts a encoded DNS name into a FQDN.
-  // name: pointer to char array where the result will be stored. Needs to have already been allocated. It's allocated length should be len - 1
-  // mapped: The encoded DNS name
-  // len: Length of mapped
+  MDNS_RESULT Answer::resolveAName(unsigned char *buffer, unsigned int len, unsigned int *offset, Response& response, long ttl, int dataLen) {
+    if(dataLen == 4) {
+      unsigned int a = (unsigned int)*(buffer + (*offset)++);
+      unsigned int b = (unsigned int)*(buffer + (*offset)++);
+      unsigned int c = (unsigned int)*(buffer + (*offset)++);
+      unsigned int d = (unsigned int)*(buffer + (*offset)++);
+
+      response.resolved = true;
+      response.ttl = ttl;
+      response.ipAddress = IPAddress(a, b, c, d);
+
+    } else {
+      (*offset) += dataLen;
+    }
+
+    return E_MDNS_OK;
+  }
+
+  MDNS_RESULT Answer::resolve(unsigned char *buffer, unsigned int len, unsigned int* offset, Cache& cache) {
+    char* assembled = (char *)malloc(sizeof(char) * MDNS_MAX_NAME_LEN);
+    int nameLen = Answer::assembleName(buffer, len, offset, &assembled);
+
+    if(nameLen == -1 * E_MDNS_POINTER_OVERFLOW) {
+      free(assembled);
+      return -1 * nameLen;
+    }
+
+    char *name = (char *)malloc(sizeof(char) * nameLen);
+    parseName(&name, assembled, strlen(assembled));
+    int cacheIndex = cache.search(name);
+    free(name);
+
+    unsigned int type = (buffer[(*offset)++] << 8) + buffer[(*offset)++];
+    unsigned int aclass = (buffer[(*offset)++] << 8) + buffer[(*offset)++];
+    unsigned long ttl = (buffer[(*offset)++] << 24) + (buffer[(*offset)++] << 16) + (buffer[(*offset)++] << 8) + buffer[(*offset)++];
+    unsigned int dataLen = (buffer[(*offset)++] << 8) + buffer[(*offset)++];
+
+    if(type == MDNS_A_RECORD && cacheIndex != -1) {
+      resolveAName(buffer, len, offset, cache[cacheIndex], ttl, dataLen);
+    } else if(type == MDNS_CNAME_RECORD && cacheIndex != -1) {
+      cache[cacheIndex].resolved = false;
+      cache[cacheIndex].ttl = ttl;
+
+      unsigned int dataOffset = (*offset);
+      (*offset) += dataLen;
+      dataLen = Answer::assembleName(buffer, len, &dataOffset, &assembled, dataLen);
+
+      if(dataLen == -1 * E_MDNS_POINTER_OVERFLOW) {
+        free(assembled);
+        return -1 * dataLen;
+      }
+
+      char *data = (char *)malloc(sizeof(char) * (dataLen - 1));
+      // This will fragment...
+      parseName(&data, assembled, dataLen - 1);
+      int cnameIndex = cache.search(data);
+
+      if(cnameIndex == -1) {
+        cache.insert(Response(std::string(data)));
+        cnameIndex = cache.search(data);
+      }
+
+      free(data);
+      cache[cacheIndex].cname = &cache[cnameIndex];
+    } else {
+      // Not an A record or a CNAME. Ignore.
+      (*offset) += dataLen;
+    }
+
+    free(assembled);
+    return E_MDNS_OK;
+  }
+
   MDNS_RESULT Answer::parseName(char** name, const char* mapped, unsigned int len) {
     unsigned int namePointer = 0;
     unsigned int mapPointer = 0;
@@ -86,8 +124,12 @@ namespace mDNSResolver {
     while(mapPointer < len) {
       int labelLength = mapped[mapPointer++];
 
-      if(namePointer + labelLength > len - 1) {
+      if(labelLength > 0x3f) {
         return E_MDNS_INVALID_LABEL_LENGTH;
+      }
+
+      if(namePointer + labelLength > len - 1) {
+        return E_MDNS_PACKET_ERROR;
       }
 
       if(namePointer != 0) {
@@ -106,34 +148,36 @@ namespace mDNSResolver {
 
   int Answer::assembleName(unsigned char *buffer, unsigned int len, unsigned int *offset, char **name, unsigned int maxlen) {
     unsigned int index = 0;
+    unsigned int nameLength = 0;
 
     while(index < maxlen) {
       if((buffer[*offset] & 0xc0) == 0xc0) {
-        unsigned int pointerOffset = ((buffer[(*offset)++] & 0x3f) << 8) + buffer[*offset];
+        unsigned int pointerOffset = ((buffer[(*offset)++] & 0x3f) << 8) + buffer[(*offset)++];
         if(pointerOffset > len) {
           // Points to somewhere beyond the packet
           return -1 * E_MDNS_POINTER_OVERFLOW;
         }
 
-        char *namePointer = *name + index;
-        int pointerLen = assembleName(buffer, len, &pointerOffset, &namePointer, maxlen - index);
+        char *namePointer = *name + nameLength;
+        int pointerLen = assembleName(buffer, len, &pointerOffset, &namePointer, MDNS_MAX_NAME_LEN - nameLength);
 
         if(pointerLen < 0) {
           return pointerLen;
         }
 
-        index += pointerLen;
+        nameLength += pointerLen;
 
         break;
       } else if(buffer[*offset] == '\0') {
-        (*name)[index++] = buffer[(*offset)++];
+        (*name)[nameLength++] = buffer[(*offset)++];
         break;
       } else {
-        (*name)[index++] = buffer[(*offset)++];
+        (*name)[nameLength++] = buffer[(*offset)++];
       }
+      index++;
     }
 
-    return index;
+    return nameLength;
   }
 
   int Answer::assembleName(unsigned char *buffer, unsigned int len, unsigned int *offset, char **name) {
@@ -156,14 +200,14 @@ namespace mDNSResolver {
           (*offset) += 2;
           break;
         } else {
-          unsigned int labelSize = (unsigned int)buffer[*offset];
+          unsigned int labelLength = (unsigned int)buffer[*offset];
 
-          if(labelSize > 0x3f) {
-            return E_MDNS_PACKET_ERROR;
+          if(labelLength > 0x3f) {
+            return E_MDNS_INVALID_LABEL_LENGTH;
           }
 
           (*offset) += 1; // Increment to move to the next byte
-          (*offset) += labelSize;
+          (*offset) += labelLength;
 
           if(*offset > len) {
             return E_MDNS_PACKET_ERROR;
@@ -179,5 +223,15 @@ namespace mDNSResolver {
     }
 
     return E_MDNS_OK;
+  }
+
+  MDNS_RESULT Answer::resolveCnames(Cache &cache) {
+    for(int i = 0; i < cache.length(); i++) {
+      if(cache[i].cname != NULL && cache[i].cname->resolved) {
+        cache[i].ipAddress = cache[i].cname->ipAddress;
+        cache[i].resolved = true;
+        cache[i].cname = NULL;
+      }
+    }
   }
 };

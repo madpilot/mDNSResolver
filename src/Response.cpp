@@ -4,12 +4,14 @@ namespace mDNSResolver {
   Response::Response() {
     this->resolved = false;
     this->ttl = 0;
+    this->cname = NULL;
   }
 
   Response::Response(std::string name) {
     this->name = name;
     this->ttl = 0;
     this->resolved = false;
+    this->cname = NULL;
   }
 
   Response::Response(std::string name, unsigned long ttl) {

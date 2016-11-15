@@ -4,29 +4,35 @@
 #include <string.h>
 
 UDP::UDP() {
-  this->readBuffer = 0;
-  this->writeBuffer = 0;
+  this->readBuffer = NULL;
+  this->writeBuffer = NULL;
   this->readBufferLength = 0;
   this->writeBufferLength = 0;
 };
 
 UDP::UDP(unsigned char *buffer, int length) {
+  this->readBuffer = NULL;
+  this->writeBuffer = NULL;
+  this->readBufferLength = 0;
+  this->writeBufferLength = 0;
   this->setReadBuffer(buffer, length);
 }
 
 UDP::~UDP() {
-  if(this->readBuffer) {
-    free(this->readBuffer);
-  }
+  //if(this->readBuffer != NULL) {
+    //free(this->readBuffer);
+    //this->readBuffer = NULL;
+  //}
 
-  if(this->writeBuffer) {
-    free(this->writeBuffer);
-  }
+  //if(this->writeBuffer != NULL) {
+    //free(this->writeBuffer);
+    //this->writeBuffer = NULL;
+  //}
 }
 
-UDP UDP::loadFromFile(const char *path) {
+UDP* UDP::loadFromFile(const char *path) {
   unsigned char *source = NULL;
-  UDP udp;
+  UDP* udp = new UDP;
 
   FILE *fp = fopen(path, "rb");
 
@@ -44,6 +50,7 @@ UDP UDP::loadFromFile(const char *path) {
       return udp;
     }
 
+    // Need to do something more c++ friendly, as this is a memory leak
     source = (unsigned char *)malloc(sizeof(unsigned char) * (bufsize + 1));
     if(fseek(fp, 0L, SEEK_SET) != 0) {
       fprintf(stderr, "ERROR: Unable to see to the beginning of the file: %s\n", path);
@@ -58,7 +65,7 @@ UDP UDP::loadFromFile(const char *path) {
       return udp;
     }
 
-    udp.setReadBuffer(source, len);
+    udp->setReadBuffer(source, len);
     fclose(fp);
     return udp;
   } else {
@@ -69,14 +76,38 @@ UDP UDP::loadFromFile(const char *path) {
 }
 
 void UDP::setReadBuffer(unsigned char *buffer, int length) {
-  if(this->readBuffer) {
-    free(this->readBuffer);
-  }
+  //if(this->readBuffer != NULL) {
+    //free(this->readBuffer);
+    //this->readBuffer = NULL;
+  //}
 
   this->readBuffer = (unsigned char *)malloc(sizeof(unsigned char) * length);
   memcpy(this->readBuffer, buffer, length);
   this->readBufferLength = length;
 }
+
+uint8_t UDP::beginMulticast(IPAddress interfaceAddr, IPAddress multicast, uint16_t port) {
+  return 0;
+}
+
+int UDP::beginPacket(IPAddress ip, uint16_t port) {
+  return 0;
+}
+
+int UDP::beginPacket(const char *host, uint16_t port) {
+  return 0;
+}
+
+int UDP::beginPacketMulticast(IPAddress multicastAddress, uint16_t port, IPAddress interfaceAddress, int ttl) {
+  return 0;
+}
+
+int UDP::endPacket() {
+  return 0;
+}
+
+
+
 
 int UDP::writeLength() {
   return this->writeBufferLength;
@@ -86,20 +117,38 @@ int UDP::readLength() {
   return this->readBufferLength;
 }
 
-void UDP::read(unsigned char *buffer, int length) {
-  memcpy(buffer, this->readBuffer, length);
+int UDP::read() {
+  return 0;
 }
 
-void UDP::write(unsigned char *buffer, int length) {
-  if(this->writeBuffer) {
-    free(this->writeBuffer);
-  }
-
-  this->writeBuffer = (unsigned char *)malloc(sizeof(unsigned char) * length);
-  memcpy(this->writeBuffer, buffer, length);
-  this->writeBufferLength = length;
+int UDP::read(unsigned char *buffer, size_t len) {
+  memcpy(buffer, this->readBuffer, len);
+  return len;
 }
 
-unsigned int UDP::parsePacket() {
+int UDP::peek() {
+  return 0;
+}
+
+void UDP::flush() {}
+
+size_t UDP::write(uint8_t) {
+  return 0;
+}
+
+size_t UDP::write(const uint8_t *buffer, size_t size) {
+  //if(this->writeBuffer != NULL) {
+    //free(this->writeBuffer);
+    //this->writeBuffer = NULL;
+  //}
+
+  this->writeBuffer = (unsigned char *)malloc(sizeof(unsigned char) * size);
+  memcpy(this->writeBuffer, buffer, size);
+  this->writeBufferLength = size;
+
+  return size;
+}
+
+int UDP::parsePacket() {
   return this->readBufferLength;
 }

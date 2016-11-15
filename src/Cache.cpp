@@ -44,6 +44,27 @@ namespace mDNSResolver {
     return -1;
   }
 
+  int Cache::search(std::string& name) {
+    for(int i = 0; i < this->size; i++) {
+      if(this->list[i].name == name) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  int Cache::search(const char* name) {
+    std::string n = std::string(name);
+    for(int i = 0; i < this->size; i++) {
+      if(this->list[i].name == n) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+
+
   void Cache::expire() {
     unsigned long ttls[MDNS_RESOLVER_MAX_CACHE];
 
@@ -81,7 +102,18 @@ namespace mDNSResolver {
     return oldestIndex;
   }
 
+  void Cache::removeCname(int index) {
+    Response *response = &this->list[index];
+
+    for(int i = 0; i < length(); i++) {
+      if(this->list[i].cname == response) {
+        this->list[i].cname = NULL;
+      }
+    }
+  }
+
   void Cache::remove(int index) {
+    removeCname(index);
     this->list[index] = this->list[this->size - 1];
     this->size -= 1;
   }
