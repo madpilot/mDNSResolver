@@ -23,3 +23,7 @@ tests:
 	make build_tests
 	test/runner
 	make clean_tests
+
+ci:
+	make build_tests
+	test/runner
