@@ -29,20 +29,15 @@ namespace mDNSResolver {
       Resolver(WiFiUDP& udp);
       Resolver(WiFiUDP& udp, IPAddress localIP);
       ~Resolver();
-
-      //std::string resolve(std::string name);
-      void setLocalIP(IPAddress localIP);
-      bool search(std::string name);
-      IPAddress address();
+			void setLocalIP(IPAddress localIP);
+      IPAddress search(std::string name);
     private:
       WiFiUDP udp;
       IPAddress localIP;
       void loop();
-      bool found;
       bool init;
       long timeout;
       void query(std::string &name);
-      IPAddress lastIPAddress;
   };
 };
 #endif

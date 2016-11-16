@@ -7,14 +7,12 @@ namespace mDNSResolver {
 
   Resolver::Resolver(WiFiUDP& udp) {
     timeout = 0;
-    found = false;
     this->udp = udp;
-    this->localIP = IPAddress(127, 0, 0, 1);
+    this->localIP = IPAddress();
   }
 
   Resolver::Resolver(WiFiUDP& udp, IPAddress localIP) {
     timeout = 0;
-    found = false;
     this->udp = udp;
     this->localIP = localIP;
   }
@@ -25,27 +23,16 @@ namespace mDNSResolver {
     this->localIP = localIP;
   }
 
-  //std::string Resolver::resolve(std::string name) {
-    //if(search(name)) {
-      //return std::string(lastIPAddress.toString().c_str());
-    //} else {
-      //return name;
-    //}
-  //}
-
-  bool Resolver::search(std::string name) {
+  IPAddress Resolver::search(std::string name) {
     cache.expire();
 
     int attempts = 0;
-    found = false;
 
     int index = cache.search(name);
     if(index == -1) {
       cache.insert(Response(name, 5));
     } else if(cache[index].resolved) {
-      found = true;
-      lastIPAddress = cache[index].ipAddress;
-      return true;
+      return cache[index].ipAddress;
     }
 
     while(attempts < MDNS_ATTEMPTS) {
@@ -63,22 +50,11 @@ namespace mDNSResolver {
       index = cache.search(name);
 
       if(index != -1 && cache[index].resolved) {
-        found = true;
-        lastIPAddress = cache[index].ipAddress;
-        return true;
+        return cache[index].ipAddress;
       }
     }
 
-    return false;
-  }
-
-  IPAddress Resolver::address() {
-    if(found) {
-      return lastIPAddress;
-    } else {
-      assert("search() must be called first, and must have returned true.");
-      return IPAddress(0, 0, 0, 0);
-    }
+    return INADDR_NONE;
   }
 
   void Resolver::query(std::string& name) {

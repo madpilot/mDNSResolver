@@ -1,19 +1,43 @@
 #include "IPAddress.h"
 
-IPAddress::IPAddress() {};
-IPAddress::IPAddress(unsigned int a, unsigned int b, unsigned int c, unsigned int d) {
-  this->a = a;
-  this->b = b;
-  this->c = c;
-  this->d = d;
+IPAddress::IPAddress()
+{
+    _address.dword = 0;
+}
+
+IPAddress::IPAddress(uint8_t first_octet, uint8_t second_octet, uint8_t third_octet, uint8_t fourth_octet)
+{
+    _address.bytes[0] = first_octet;
+    _address.bytes[1] = second_octet;
+    _address.bytes[2] = third_octet;
+    _address.bytes[3] = fourth_octet;
+}
+
+IPAddress::IPAddress(uint32_t address)
+{
+    _address.dword = address;
+}
+
+IPAddress::IPAddress(const uint8_t *address)
+{
+    memcpy(_address.bytes, address, sizeof(_address.bytes));
+}
+
+IPAddress& IPAddress::operator=(const uint8_t *address)
+{
+    memcpy(_address.bytes, address, sizeof(_address.bytes));
+    return *this;
+}
+
+IPAddress& IPAddress::operator=(uint32_t address)
+{
+    _address.dword = address;
+    return *this;
+}
+
+bool IPAddress::operator==(const uint8_t* addr) const
+{
+    return memcmp(addr, _address.bytes, sizeof(_address.bytes)) == 0;
 }
 
 
-bool IPAddress::operator==(const IPAddress& ipaddr) {
-  return this->a == ipaddr.a && this->b == ipaddr.b && this->c == ipaddr.c && this->d == ipaddr.d;
-}
-
-std::string IPAddress::toString() {
-  std::string buffer = std::to_string(this->a) + "." + std::to_string(this->b) + "." + std::to_string(this->c) + "." + std::to_string(this->d);
-  return buffer;
-}
