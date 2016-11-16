@@ -25,13 +25,13 @@ namespace mDNSResolver {
     this->localIP = localIP;
   }
 
-  std::string Resolver::resolve(std::string name) {
-    if(search(name)) {
-      return std::string(lastIPAddress.toString().c_str());
-    } else {
-      return name;
-    }
-  }
+  //std::string Resolver::resolve(std::string name) {
+    //if(search(name)) {
+      //return std::string(lastIPAddress.toString().c_str());
+    //} else {
+      //return name;
+    //}
+  //}
 
   bool Resolver::search(std::string name) {
     cache.expire();

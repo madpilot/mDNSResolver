@@ -71,24 +71,24 @@ SCENARIO("resolving an mDNS name") {
     }
   }
 
-  WHEN("resolving a name") {
-    Resolver resolver(*Udp, localIP);
+  //WHEN("resolving a name") {
+    //Resolver resolver(*Udp, localIP);
 
-    GIVEN("a name does not exist") {
-      std::string returned = resolver.resolve("test.local");
+    //GIVEN("a name does not exist") {
+      //std::string returned = resolver.resolve("test.local");
 
-      THEN("the supplied name will be returned") {
-        REQUIRE(returned == "test.local");
-      }
-    }
+      //THEN("the supplied name will be returned") {
+        //REQUIRE(returned == "test.local");
+      //}
+    //}
 
-    GIVEN("a name does exist") {
-      std::string returned = resolver.resolve("mqtt.local");
-      THEN("the returned string is the resolved IP Address") {
-        REQUIRE(returned == "192.168.1.2");
-      }
-    }
-  }
+    //GIVEN("a name does exist") {
+      //std::string returned = resolver.resolve("mqtt.local");
+      //THEN("the returned string is the resolved IP Address") {
+        //REQUIRE(returned == "192.168.1.2");
+      //}
+    //}
+  //}
 
   delete Udp;
 }
