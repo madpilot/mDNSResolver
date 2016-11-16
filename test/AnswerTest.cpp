@@ -8,12 +8,12 @@
 #include "Answer.h"
 #include "Cache.h"
 
-#include <UDP.h>
+#include <WiFiUdp.h>
 
 using namespace mDNSResolver;
 
 SCENARIO("resolving a packet") {
-  UDP* Udp = UDP::loadFromFile("fixtures/cname_answer.bin");
+  WiFiUDP* Udp = WiFiUDP::loadFromFile("fixtures/cname_answer.bin");
   unsigned len = Udp->parsePacket();
   unsigned char *packet = (unsigned char *)malloc(sizeof(unsigned char) * len);
   Udp->read(packet, len);
@@ -246,7 +246,7 @@ SCENARIO("resolving a packet") {
 
 SCENARIO("mDNS packet with a question is received.") {
   GIVEN("the packet has questions") {
-    UDP* Udp = UDP::loadFromFile("fixtures/question.bin");
+    WiFiUDP* Udp = WiFiUDP::loadFromFile("fixtures/question.bin");
     unsigned len = Udp->parsePacket();
     unsigned char *packet = (unsigned char *)malloc(sizeof(unsigned char) * len);
 
@@ -270,7 +270,7 @@ SCENARIO("mDNS packet with a question is received.") {
   }
 
   GIVEN("the packet is malicious and attempts to overflow the pointer") {
-    UDP* Udp = UDP::loadFromFile("fixtures/overflow_question.bin");
+    WiFiUDP* Udp = WiFiUDP::loadFromFile("fixtures/overflow_question.bin");
     unsigned len = Udp->parsePacket();
     unsigned char *packet = (unsigned char *)malloc(sizeof(unsigned char) * len);
 

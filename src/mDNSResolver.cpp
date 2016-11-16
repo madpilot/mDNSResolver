@@ -25,13 +25,10 @@ namespace mDNSResolver {
     this->localIP = localIP;
   }
 
-  const char* Resolver::resolve(const char* name) {
+  std::string Resolver::resolve(std::string name) {
     if(search(name)) {
-      printf("Found\n");
-      Serial.println(lastIPAddress);
-      return lastIPAddress.toString().c_str();
+      return std::string(lastIPAddress.toString().c_str());
     } else {
-      printf("Not found\n");
       return name;
     }
   }

@@ -8,7 +8,7 @@ build_tests:
 		test/ResponseTest.cpp     src/Response.cpp \
 		test/AnswerTest.cpp       src/Answer.cpp \
 		test/mDNSResolverTest.cpp src/mDNSResolver.cpp \
-		mocks/UDP.cpp mocks/IPAddress.cpp mocks/millis.c \
+		mocks/WiFiUdp.cpp mocks/IPAddress.cpp mocks/Arduino.cpp \
 		-I src \
 		-I mocks \
 		-D TEST \

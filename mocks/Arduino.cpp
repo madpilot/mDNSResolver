@@ -1,4 +1,4 @@
-#include "millis.h"
+#include "Arduino.h"
 #include <stdio.h>
 
 static millis_t mocked = 0;

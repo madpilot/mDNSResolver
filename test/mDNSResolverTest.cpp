@@ -5,14 +5,14 @@
 
 #include "mDNSResolver.h"
 
-#include <UDP.h>
+#include <WiFiUdp.h>
 #include <IPAddress.h>
 
 using namespace mDNSResolver;
 
 SCENARIO("resolving an mDNS name") {
   IPAddress localIP(192, 168, 0, 1);
-  UDP* Udp = UDP::loadFromFile("fixtures/cname_answer.bin");
+  WiFiUDP* Udp = WiFiUDP::loadFromFile("fixtures/cname_answer.bin");
 
   WHEN("searching for a name") {
     Resolver resolver(*Udp, localIP);
