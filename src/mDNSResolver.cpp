@@ -1,18 +1,18 @@
 #include "mDNSResolver.h"
-#include <millis.h>
+#include "Arduino.h"
 #include <assert.h>
 
 namespace mDNSResolver {
   Cache cache;
 
-  Resolver::Resolver(UDP udp) {
+  Resolver::Resolver(WiFiUDP& udp) {
     timeout = 0;
     found = false;
     this->udp = udp;
     this->localIP = IPAddress(127, 0, 0, 1);
   }
 
-  Resolver::Resolver(UDP udp, IPAddress localIP) {
+  Resolver::Resolver(WiFiUDP& udp, IPAddress localIP) {
     timeout = 0;
     found = false;
     this->udp = udp;
@@ -25,10 +25,10 @@ namespace mDNSResolver {
     this->localIP = localIP;
   }
 
-  std::string Resolver::resolve(std::string name) {
+  const char* Resolver::resolve(const char* name) {
     if(search(name)) {
       printf("Found\n");
-      return lastIPAddress.toString();
+      return lastIPAddress.toString().c_str();
     } else {
       printf("Not found\n");
       return name;
@@ -86,7 +86,7 @@ namespace mDNSResolver {
   void Resolver::query(std::string& name) {
     Query query(name);
     udp.beginPacketMulticast(MDNS_BROADCAST_IP, MDNS_PORT, localIP, UDP_TIMEOUT);
-    query.sendPacket(&udp);
+    query.sendPacket(udp);
     udp.endPacket();
   }
 

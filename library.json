@@ -1,0 +1,17 @@
+{
+    "name": "mDNSResolver",
+    "keywords": "ethernet, iot, mdns, bonjour",
+    "description": "A library that resolve mDNS name",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/madpilot/mDNSResolver.git"
+    },
+    "version": "0.1",
+    "exclude": "tests,fixtures,mocks",
+    "examples": "examples/*/*.ino",
+    "frameworks": "arduino",
+    "platforms": [
+        "atmelavr",
+        "espressif"
+    ]
+}

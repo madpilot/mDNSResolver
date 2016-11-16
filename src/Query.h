@@ -4,7 +4,7 @@
 #include "Constants.h"
 
 #include <string>
-#include <UDP.h>
+#include <WiFiUdp.h>
 
 #define MDNS_RESOLVER_MAX_CACHE 4
 
@@ -13,7 +13,7 @@ namespace mDNSResolver {
   public:
     Query(std::string name);
     ~Query();
-    void sendPacket(UDP *socket);
+    void sendPacket(WiFiUDP& socket);
 
   private:
     std::string name;
