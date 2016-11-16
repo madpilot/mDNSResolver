@@ -5,17 +5,17 @@
 
 #include "mDNSResolver.h"
 
-#include <UDP.h>
+#include <WiFiUdp.h>
 #include <IPAddress.h>
 
 using namespace mDNSResolver;
 
 SCENARIO("resolving an mDNS name") {
   IPAddress localIP(192, 168, 0, 1);
-  UDP* Udp = UDP::loadFromFile("fixtures/cname_answer.bin");
+  WiFiUDP* Udp = WiFiUDP::loadFromFile("fixtures/cname_answer.bin");
 
   WHEN("searching for a name") {
-  Resolver resolver(*Udp, localIP);
+    Resolver resolver(*Udp, localIP);
     GIVEN("a search") {
       resolver.search("test.local");
 
@@ -70,6 +70,25 @@ SCENARIO("resolving an mDNS name") {
       }
     }
   }
+
+  //WHEN("resolving a name") {
+    //Resolver resolver(*Udp, localIP);
+
+    //GIVEN("a name does not exist") {
+      //std::string returned = resolver.resolve("test.local");
+
+      //THEN("the supplied name will be returned") {
+        //REQUIRE(returned == "test.local");
+      //}
+    //}
+
+    //GIVEN("a name does exist") {
+      //std::string returned = resolver.resolve("mqtt.local");
+      //THEN("the returned string is the resolved IP Address") {
+        //REQUIRE(returned == "192.168.1.2");
+      //}
+    //}
+  //}
 
   delete Udp;
 }

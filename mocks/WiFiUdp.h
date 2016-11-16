@@ -1,16 +1,16 @@
-#ifndef UDP_H
-#define UDP_H
+#ifndef WIFI_UDP_H
+#define WIFI_UDP_H
 
 #include "IPAddress.h"
 
-class UDP {
+class WiFiUDP {
 public:
-  UDP();
+  WiFiUDP();
   // Initialise the read buffer
-  UDP(unsigned char *packet, int length);
-  ~UDP();
+  WiFiUDP(unsigned char *packet, int length);
+  ~WiFiUDP();
 
-  static UDP* loadFromFile(const char *path);
+  static WiFiUDP* loadFromFile(const char *path);
 
   void setReadBuffer(unsigned char *buffer, int length);
 

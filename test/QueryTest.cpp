@@ -1,11 +1,11 @@
 #include "catch.h"
 #include "Query.h"
-#include <UDP.h>
+#include <WiFiUdp.h>
 
 TEST_CASE("Assemble Packet", "[Query]" ) {
   std::string name = std::string("test.local");
   mDNSResolver::Query q(name);
-  UDP udp;
+  WiFiUDP udp;
 
   SECTION("packet output") {
     unsigned char expected[] = {
@@ -32,7 +32,7 @@ TEST_CASE("Assemble Packet", "[Query]" ) {
       0x01, // QClass
     };
 
-    q.sendPacket(&udp);
+    q.sendPacket(udp);
 
     for(int i = 0; i < udp.writeLength(); i++) {
       REQUIRE(udp.writeBuffer[i] == expected[i]);

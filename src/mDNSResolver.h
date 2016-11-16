@@ -2,12 +2,12 @@
 #define MDNS_RESOLVER_h
 
 #include <IPAddress.h>
-#include <UDP.h>
+#include <WiFiUdp.h>
 #include "Cache.h"
 #include "Query.h"
 #include "Answer.h"
 
-#define MDNS_BROADCAST_IP IPAddress(255, 0, 0, 251)
+#define MDNS_BROADCAST_IP IPAddress(224, 0, 0, 251)
 #define MDNS_PORT         5353
 
 #ifndef MDNS_RETRY
@@ -26,15 +26,16 @@
 namespace mDNSResolver {
   class Resolver {
     public:
-      Resolver(UDP udp);
-      Resolver(UDP udp, IPAddress localIP);
+      Resolver(WiFiUDP& udp);
+      Resolver(WiFiUDP& udp, IPAddress localIP);
       ~Resolver();
 
+      //std::string resolve(std::string name);
       void setLocalIP(IPAddress localIP);
       bool search(std::string name);
       IPAddress address();
     private:
-      UDP udp;
+      WiFiUDP udp;
       IPAddress localIP;
       void loop();
       bool found;

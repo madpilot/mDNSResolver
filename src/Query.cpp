@@ -10,11 +10,11 @@ namespace mDNSResolver {
   // If we pass in a UDP proxy, we can dynamically allocate the
   // memory without fee of fragmentation, and don't risk losing
   // the reference if this object disappears
-  void Query::sendPacket(UDP *socket) {
+  void Query::sendPacket(WiFiUDP& socket) {
     int bufferLength = this->name.length() + 18;
     unsigned char buffer[bufferLength];
     assemblePacket(buffer, bufferLength);
-    socket->write(buffer, bufferLength);
+    socket.write(buffer, bufferLength);
   }
 
   void Query::assemblePacket(unsigned char *buffer, int bufferLength) {

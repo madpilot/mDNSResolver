@@ -1,18 +1,18 @@
 #include "mDNSResolver.h"
-#include <millis.h>
+#include "Arduino.h"
 #include <assert.h>
 
 namespace mDNSResolver {
   Cache cache;
 
-  Resolver::Resolver(UDP udp) {
+  Resolver::Resolver(WiFiUDP& udp) {
     timeout = 0;
     found = false;
     this->udp = udp;
     this->localIP = IPAddress(127, 0, 0, 1);
   }
 
-  Resolver::Resolver(UDP udp, IPAddress localIP) {
+  Resolver::Resolver(WiFiUDP& udp, IPAddress localIP) {
     timeout = 0;
     found = false;
     this->udp = udp;
@@ -24,6 +24,14 @@ namespace mDNSResolver {
   void Resolver::setLocalIP(IPAddress localIP) {
     this->localIP = localIP;
   }
+
+  //std::string Resolver::resolve(std::string name) {
+    //if(search(name)) {
+      //return std::string(lastIPAddress.toString().c_str());
+    //} else {
+      //return name;
+    //}
+  //}
 
   bool Resolver::search(std::string name) {
     cache.expire();
@@ -69,26 +77,27 @@ namespace mDNSResolver {
       return lastIPAddress;
     } else {
       assert("search() must be called first, and must have returned true.");
+      return IPAddress(0, 0, 0, 0);
     }
   }
 
   void Resolver::query(std::string& name) {
     Query query(name);
     udp.beginPacketMulticast(MDNS_BROADCAST_IP, MDNS_PORT, localIP, UDP_TIMEOUT);
-    query.sendPacket(&udp);
+    query.sendPacket(udp);
     udp.endPacket();
   }
 
   void Resolver::loop() {
     cache.expire();
 
+    if(!init) {
+      init = true;
+      udp.beginMulticast(localIP, MDNS_BROADCAST_IP, MDNS_PORT);
+    }
+
     unsigned int len = udp.parsePacket();
     if(len > 0) {
-      if(!init) {
-        init = true;
-        udp.beginMulticast(localIP, MDNS_BROADCAST_IP, MDNS_PORT);
-      }
-
       unsigned char *buffer = (unsigned char *)malloc(sizeof(unsigned char) * len);
       udp.read(buffer, len);
       Answer::process(buffer, len, cache);

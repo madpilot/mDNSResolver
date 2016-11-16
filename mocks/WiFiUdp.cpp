@@ -1,16 +1,16 @@
-#include "UDP.h"
+#include "WiFiUdp.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-UDP::UDP() {
+WiFiUDP::WiFiUDP() {
   this->readBuffer = NULL;
   this->writeBuffer = NULL;
   this->readBufferLength = 0;
   this->writeBufferLength = 0;
 };
 
-UDP::UDP(unsigned char *buffer, int length) {
+WiFiUDP::WiFiUDP(unsigned char *buffer, int length) {
   this->readBuffer = NULL;
   this->writeBuffer = NULL;
   this->readBufferLength = 0;
@@ -18,7 +18,7 @@ UDP::UDP(unsigned char *buffer, int length) {
   this->setReadBuffer(buffer, length);
 }
 
-UDP::~UDP() {
+WiFiUDP::~WiFiUDP() {
   //if(this->readBuffer != NULL) {
     //free(this->readBuffer);
     //this->readBuffer = NULL;
@@ -30,9 +30,9 @@ UDP::~UDP() {
   //}
 }
 
-UDP* UDP::loadFromFile(const char *path) {
+WiFiUDP* WiFiUDP::loadFromFile(const char *path) {
   unsigned char *source = NULL;
-  UDP* udp = new UDP;
+  WiFiUDP* udp = new WiFiUDP;
 
   FILE *fp = fopen(path, "rb");
 
@@ -75,7 +75,7 @@ UDP* UDP::loadFromFile(const char *path) {
   return udp;
 }
 
-void UDP::setReadBuffer(unsigned char *buffer, int length) {
+void WiFiUDP::setReadBuffer(unsigned char *buffer, int length) {
   //if(this->readBuffer != NULL) {
     //free(this->readBuffer);
     //this->readBuffer = NULL;
@@ -86,57 +86,57 @@ void UDP::setReadBuffer(unsigned char *buffer, int length) {
   this->readBufferLength = length;
 }
 
-uint8_t UDP::beginMulticast(IPAddress interfaceAddr, IPAddress multicast, uint16_t port) {
+uint8_t WiFiUDP::beginMulticast(IPAddress interfaceAddr, IPAddress multicast, uint16_t port) {
   return 0;
 }
 
-int UDP::beginPacket(IPAddress ip, uint16_t port) {
+int WiFiUDP::beginPacket(IPAddress ip, uint16_t port) {
   return 0;
 }
 
-int UDP::beginPacket(const char *host, uint16_t port) {
+int WiFiUDP::beginPacket(const char *host, uint16_t port) {
   return 0;
 }
 
-int UDP::beginPacketMulticast(IPAddress multicastAddress, uint16_t port, IPAddress interfaceAddress, int ttl) {
+int WiFiUDP::beginPacketMulticast(IPAddress multicastAddress, uint16_t port, IPAddress interfaceAddress, int ttl) {
   return 0;
 }
 
-int UDP::endPacket() {
+int WiFiUDP::endPacket() {
   return 0;
 }
 
 
 
 
-int UDP::writeLength() {
+int WiFiUDP::writeLength() {
   return this->writeBufferLength;
 }
 
-int UDP::readLength() {
+int WiFiUDP::readLength() {
   return this->readBufferLength;
 }
 
-int UDP::read() {
+int WiFiUDP::read() {
   return 0;
 }
 
-int UDP::read(unsigned char *buffer, size_t len) {
+int WiFiUDP::read(unsigned char *buffer, size_t len) {
   memcpy(buffer, this->readBuffer, len);
   return len;
 }
 
-int UDP::peek() {
+int WiFiUDP::peek() {
   return 0;
 }
 
-void UDP::flush() {}
+void WiFiUDP::flush() {}
 
-size_t UDP::write(uint8_t) {
+size_t WiFiUDP::write(uint8_t) {
   return 0;
 }
 
-size_t UDP::write(const uint8_t *buffer, size_t size) {
+size_t WiFiUDP::write(const uint8_t *buffer, size_t size) {
   //if(this->writeBuffer != NULL) {
     //free(this->writeBuffer);
     //this->writeBuffer = NULL;
@@ -149,6 +149,6 @@ size_t UDP::write(const uint8_t *buffer, size_t size) {
   return size;
 }
 
-int UDP::parsePacket() {
+int WiFiUDP::parsePacket() {
   return this->readBufferLength;
 }
