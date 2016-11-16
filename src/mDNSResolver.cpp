@@ -28,6 +28,7 @@ namespace mDNSResolver {
   const char* Resolver::resolve(const char* name) {
     if(search(name)) {
       printf("Found\n");
+      Serial.println(lastIPAddress);
       return lastIPAddress.toString().c_str();
     } else {
       printf("Not found\n");
@@ -93,13 +94,13 @@ namespace mDNSResolver {
   void Resolver::loop() {
     cache.expire();
 
+    if(!init) {
+      init = true;
+      udp.beginMulticast(localIP, MDNS_BROADCAST_IP, MDNS_PORT);
+    }
+
     unsigned int len = udp.parsePacket();
     if(len > 0) {
-      if(!init) {
-        init = true;
-        udp.beginMulticast(localIP, MDNS_BROADCAST_IP, MDNS_PORT);
-      }
-
       unsigned char *buffer = (unsigned char *)malloc(sizeof(unsigned char) * len);
       udp.read(buffer, len);
       Answer::process(buffer, len, cache);
