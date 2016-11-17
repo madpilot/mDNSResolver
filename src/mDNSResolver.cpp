@@ -8,7 +8,6 @@ namespace mDNSResolver {
   Resolver::Resolver(WiFiUDP& udp) {
     timeout = 0;
     this->udp = udp;
-    this->localIP = IPAddress();
   }
 
   Resolver::Resolver(WiFiUDP& udp, IPAddress localIP) {
