@@ -28,13 +28,16 @@ namespace mDNSResolver {
     int attempts = 0;
 
     int index = cache.search(name);
-    if(index == -1) {
-      cache.insert(Response(name, 5));
-    } else if(cache[index].resolved) {
-      return cache[index].ipAddress;
-    }
 
     while(attempts < MDNS_ATTEMPTS) {
+      int index = cache.search(name);
+
+      if(index == -1) {
+        cache.insert(Response(name, 5));
+      } else if(cache[index].resolved) {
+        return cache[index].ipAddress;
+      }
+
       long now = millis();
 
       // Send a query packet every second
@@ -45,12 +48,6 @@ namespace mDNSResolver {
       }
 
       loop();
-
-      index = cache.search(name);
-
-      if(index != -1 && cache[index].resolved) {
-        return cache[index].ipAddress;
-      }
     }
 
     return INADDR_NONE;

@@ -5,6 +5,7 @@ namespace mDNSResolver {
     this->resolved = false;
     this->ttl = 0;
     this->cname = NULL;
+    this->ipAddress = INADDR_NONE;
   }
 
   Response::Response(std::string name) {
@@ -12,12 +13,14 @@ namespace mDNSResolver {
     this->ttl = 0;
     this->resolved = false;
     this->cname = NULL;
+    this->ipAddress = INADDR_NONE;
   }
 
   Response::Response(std::string name, unsigned long ttl) {
     this->name = name;
     this->ttl = ttl;
     this->resolved = false;
+    this->ipAddress = INADDR_NONE;
   }
 
   Response::~Response() {
