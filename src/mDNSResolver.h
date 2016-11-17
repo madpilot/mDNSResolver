@@ -31,10 +31,11 @@ namespace mDNSResolver {
       ~Resolver();
 			void setLocalIP(IPAddress localIP);
       IPAddress search(std::string name);
+      MDNS_RESULT lastResult;
     private:
       WiFiUDP udp;
       IPAddress localIP;
-      void loop();
+      MDNS_RESULT loop();
       bool init;
       long timeout;
       void query(std::string &name);

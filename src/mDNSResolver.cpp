@@ -46,7 +46,10 @@ namespace mDNSResolver {
         attempts++;
       }
 
-      loop();
+      MDNS_RESULT result = loop();
+      if(result != E_MDNS_OK) {
+        return INADDR_NONE;
+      }
     }
 
     return INADDR_NONE;
@@ -59,7 +62,7 @@ namespace mDNSResolver {
     udp.endPacket();
   }
 
-  void Resolver::loop() {
+  MDNS_RESULT Resolver::loop() {
     cache.expire();
 
     if(!init) {
@@ -74,12 +77,14 @@ namespace mDNSResolver {
       if(buffer == NULL) {
         // Out of memory - the packet is probably too big to parse. Probably.
         // Silently bombing out, possibly isn'te great, but it'll do for the moment.
-        return;
+        return E_MDNS_OUT_OF_MEMORY;
       }
 
       udp.read(buffer, len);
-      Answer::process(buffer, len, cache);
+      lastResult = Answer::process(buffer, len, cache);
       free(buffer);
+      return lastResult;
     }
+    return E_MDNS_OK;
   }
 };
