@@ -27,13 +27,12 @@ namespace mDNSResolver {
 
     int attempts = 0;
 
-    int index = cache.search(name);
-
     while(attempts < MDNS_ATTEMPTS) {
       int index = cache.search(name);
 
       if(index == -1) {
         cache.insert(Response(name, 5));
+        continue;
       } else if(cache[index].resolved) {
         return cache[index].ipAddress;
       }
