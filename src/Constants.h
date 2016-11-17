@@ -14,6 +14,7 @@
 #define E_MDNS_PARSING_ERROR              0x24
 #define E_MDNS_TRUNCATED                  0x25
 #define E_MDNS_INVALID_LABEL_LENGTH       0x26
+#define E_MDNS_OUT_OF_MEMORY              0x27
 
 #define MDNS_A_RECORD                     0x01
 #define MDNS_CNAME_RECORD                 0x05

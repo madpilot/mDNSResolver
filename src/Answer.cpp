@@ -64,6 +64,9 @@ namespace mDNSResolver {
 
   MDNS_RESULT Answer::resolve(unsigned char *buffer, unsigned int len, unsigned int* offset, Cache& cache) {
     char* assembled = (char *)malloc(sizeof(char) * MDNS_MAX_NAME_LEN);
+    if(assembled == NULL) {
+      return E_MDNS_OUT_OF_MEMORY;
+    }
     int nameLen = Answer::assembleName(buffer, len, offset, &assembled);
 
     if(nameLen == -1 * E_MDNS_POINTER_OVERFLOW) {
@@ -72,6 +75,10 @@ namespace mDNSResolver {
     }
 
     char *name = (char *)malloc(sizeof(char) * nameLen);
+    if(name == NULL) {
+      free(assembled);
+      return E_MDNS_OUT_OF_MEMORY;
+    }
     parseName(&name, assembled, strlen(assembled));
     int cacheIndex = cache.search(name);
     free(name);
@@ -97,6 +104,11 @@ namespace mDNSResolver {
       }
 
       char *data = (char *)malloc(sizeof(char) * (dataLen - 1));
+      if(data == NULL) {
+        free(assembled);
+        return E_MDNS_OUT_OF_MEMORY;
+      }
+
       // This will fragment...
       parseName(&data, assembled, dataLen - 1);
       int cnameIndex = cache.search(data);

@@ -70,6 +70,13 @@ namespace mDNSResolver {
     unsigned int len = udp.parsePacket();
     if(len > 0) {
       unsigned char *buffer = (unsigned char *)malloc(sizeof(unsigned char) * len);
+
+      if(buffer == NULL) {
+        // Out of memory - the packet is probably too big to parse. Probably.
+        // Silently bombing out, possibly isn'te great, but it'll do for the moment.
+        return;
+      }
+
       udp.read(buffer, len);
       Answer::process(buffer, len, cache);
       free(buffer);
