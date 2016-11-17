@@ -2,13 +2,14 @@
 
 namespace mDNSResolver {
   Response::Response() {
+    this->name = "";
     this->resolved = false;
     this->ttl = 0;
     this->cname = NULL;
     this->ipAddress = INADDR_NONE;
   }
 
-  Response::Response(std::string name) {
+  Response::Response(const char* name) {
     this->name = name;
     this->ttl = 0;
     this->resolved = false;
@@ -16,7 +17,7 @@ namespace mDNSResolver {
     this->ipAddress = INADDR_NONE;
   }
 
-  Response::Response(std::string name, unsigned long ttl) {
+  Response::Response(const char* name, unsigned long ttl) {
     this->name = name;
     this->ttl = ttl;
     this->resolved = false;
@@ -33,6 +34,10 @@ namespace mDNSResolver {
   }
 
   bool Response::operator==(const Response& response) {
-    return this->name == response.name;
+    return strcmp(this->name, response.name) == 0;
+  }
+
+  bool Response::operator!=(const Response& response) {
+    return strcmp(this->name, response.name) != 0;
   }
 }

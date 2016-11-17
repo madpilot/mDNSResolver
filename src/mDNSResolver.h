@@ -30,7 +30,7 @@ namespace mDNSResolver {
       Resolver(WiFiUDP& udp, IPAddress localIP);
       ~Resolver();
 			void setLocalIP(IPAddress localIP);
-      IPAddress search(std::string name);
+      IPAddress search(const char* name);
       MDNS_RESULT lastResult;
     private:
       WiFiUDP udp;
@@ -38,7 +38,7 @@ namespace mDNSResolver {
       MDNS_RESULT loop();
       bool init;
       long timeout;
-      void query(std::string &name);
+      void query(const char* name);
   };
 };
 #endif

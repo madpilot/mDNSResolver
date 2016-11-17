@@ -3,7 +3,6 @@
 
 #include "Constants.h"
 #include "Response.h"
-#include <string>
 
 namespace mDNSResolver {
   class Cache {
@@ -14,7 +13,6 @@ namespace mDNSResolver {
     void remove(Response& response);
 
     int search(Response& response);
-    int search(std::string& name);
     int search(const char* name);
 
     void expire();

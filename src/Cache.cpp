@@ -36,34 +36,17 @@ namespace mDNSResolver {
   }
 
   int Cache::search(Response& response) {
-    for(int i = 0; i < this->size; i++) {
-      if(this->list[i] == response) {
-        return i;
-      }
-    }
-    return -1;
-  }
-
-  int Cache::search(std::string& name) {
-    for(int i = 0; i < this->size; i++) {
-      if(this->list[i].name == name) {
-        return i;
-      }
-    }
-    return -1;
+    return search(response.name);
   }
 
   int Cache::search(const char* name) {
-    std::string n = std::string(name);
     for(int i = 0; i < this->size; i++) {
-      if(this->list[i].name == n) {
+      if(strcmp(this->list[i].name, name) == 0) {
         return i;
       }
     }
     return -1;
   }
-
-
 
   void Cache::expire() {
     unsigned long ttls[MDNS_RESOLVER_MAX_CACHE];

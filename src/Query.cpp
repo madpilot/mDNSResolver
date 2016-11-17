@@ -1,7 +1,7 @@
 #include "Query.h"
 
 namespace mDNSResolver {
-  Query::Query(std::string name) {
+  Query::Query(const char* name) {
     this->name = name;
   }
 
@@ -11,7 +11,7 @@ namespace mDNSResolver {
   // memory without fee of fragmentation, and don't risk losing
   // the reference if this object disappears
   void Query::sendPacket(WiFiUDP& socket) {
-    int bufferLength = this->name.length() + 18;
+    int bufferLength = strlen(this->name) + 18;
     unsigned char buffer[bufferLength];
     assemblePacket(buffer, bufferLength);
     socket.write(buffer, bufferLength);

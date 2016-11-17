@@ -5,10 +5,6 @@
 #include "Response.h"
 #include "Cache.h"
 
-#include <string>
-#include <array>
-#include <vector>
-
 namespace mDNSResolver {
   class Answer {
   public:

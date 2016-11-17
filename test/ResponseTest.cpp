@@ -29,3 +29,26 @@ SCENARIO("Decrementing the TTL") {
     }
   }
 }
+
+SCENARIO("Equality") {
+  GIVEN("A response") {
+    Response r1("test.local");
+
+    WHEN("Testing against a response with the same name") {
+      Response r2("test.local");
+
+      THEN("they two objects should be equal") {
+        REQUIRE(r1 == r2);
+      }
+    }
+
+    WHEN("Testing against a response with a different name") {
+      Response r2("test2.local");
+
+      THEN("they two objects should not be equal") {
+        REQUIRE(r1 != r2);
+      }
+    }
+
+  }
+}

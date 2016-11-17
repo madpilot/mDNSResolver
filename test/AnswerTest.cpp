@@ -44,7 +44,7 @@ SCENARIO("resolving a packet") {
     Cache cache;
 
     GIVEN("an unresolved Response object") {
-      Response response(std::string("test.local"));
+      Response response("test.local");
       cache.insert(response);
 
       WHEN("parsing an A-record answer with a name that does not match the Response object") {
@@ -75,7 +75,7 @@ SCENARIO("resolving a packet") {
     }
 
     GIVEN("an unresolved Response object") {
-      Response response(std::string("nas.local"));
+      Response response("nas.local");
       cache.insert(response);
 
       WHEN("parsing an A-record answer with a name that matches the Response object") {
@@ -105,7 +105,7 @@ SCENARIO("resolving a packet") {
     }
 
     GIVEN("an unresolved Response object") {
-      Response response(std::string("mqtt.local"));
+      Response response("mqtt.local");
       cache.insert(response);
 
       WHEN("parsing a complete CNAME packet") {
@@ -120,7 +120,7 @@ SCENARIO("resolving a packet") {
         }
 
         THEN("the resolved A-record will be in the cache") {
-          REQUIRE(cache[1].name == "nas.local");
+          REQUIRE(strcmp(cache[1].name, "nas.local") == 0);
         }
 
         THEN("the A-record will be resolved") {
@@ -167,7 +167,7 @@ SCENARIO("resolving a packet") {
           }
 
           THEN("the Response object cname pointer's name will match the data payload") {
-            REQUIRE(cache[0].cname->name == std::string("nas.local"));
+            REQUIRE(strcmp(cache[0].cname->name, "nas.local") == 0);
           }
         }
 
