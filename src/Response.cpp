@@ -26,6 +26,7 @@ namespace mDNSResolver {
     this->name[MDNS_MAX_NAME_LEN + 1] = '\0';
     this->ttl = ttl;
     this->resolved = false;
+    this->cname = NULL;
     this->ipAddress = INADDR_NONE;
   }
 

@@ -16,6 +16,7 @@ SCENARIO("resolving an mDNS name") {
 
   WHEN("searching for a name") {
     Resolver resolver(*Udp, localIP);
+
     GIVEN("a search") {
       resolver.search("test.local");
 
