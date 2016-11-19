@@ -1,6 +1,6 @@
 #include "Response.h"
 #ifdef TEST
-#include <stdlib.h>
+#include <string.h>
 #endif
 
 namespace mDNSResolver {

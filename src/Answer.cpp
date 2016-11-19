@@ -105,22 +105,16 @@ namespace mDNSResolver {
         return -1 * dataLen;
       }
 
-      char *data = (char *)malloc(sizeof(char) * (dataLen - 1));
-      if(data == NULL) {
-        free(assembled);
-        return E_MDNS_OUT_OF_MEMORY;
-      }
-
-      // This will fragment...
-      parseName(&data, assembled, dataLen - 1);
-      int cnameIndex = cache.search(data);
+      Response r;
+      char* responseName = &*r.name;
+      parseName(&responseName, assembled, dataLen - 1);
+      int cnameIndex = cache.search(r);
 
       if(cnameIndex == -1) {
-        cache.insert(Response(data));
-        cnameIndex = cache.search(data);
+        cache.insert(r);
+        cnameIndex = cache.search(r);
       }
 
-      free(data);
       cache[cacheIndex].cname = &cache[cnameIndex];
     } else {
       // Not an A record or a CNAME. Ignore.
