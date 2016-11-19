@@ -1,7 +1,9 @@
 #include "Answer.h"
 
+#ifdef TEST
 #include <string.h>
 #include <stdlib.h>
+#endif
 
 namespace mDNSResolver {
   MDNS_RESULT Answer::process(unsigned char* buffer, unsigned int len, Cache& cache) {
@@ -114,7 +116,7 @@ namespace mDNSResolver {
       int cnameIndex = cache.search(data);
 
       if(cnameIndex == -1) {
-        cache.insert(Response(std::string(data)));
+        cache.insert(Response(data));
         cnameIndex = cache.search(data);
       }
 

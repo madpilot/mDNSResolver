@@ -3,8 +3,7 @@
 #include <WiFiUdp.h>
 
 TEST_CASE("Assemble Packet", "[Query]" ) {
-  std::string name = std::string("test.local");
-  mDNSResolver::Query q(name);
+  mDNSResolver::Query q("test.local");
   WiFiUDP udp;
 
   SECTION("packet output") {

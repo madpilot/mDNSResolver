@@ -1,6 +1,9 @@
 #include "mDNSResolver.h"
 #include "Arduino.h"
-#include <assert.h>
+
+#ifdef TEST
+#include <stdlib.h>
+#endif
 
 namespace mDNSResolver {
   Cache cache;
@@ -22,7 +25,7 @@ namespace mDNSResolver {
     this->localIP = localIP;
   }
 
-  IPAddress Resolver::search(std::string name) {
+  IPAddress Resolver::search(const char* name) {
     cache.expire();
 
     int attempts = 0;
@@ -55,7 +58,7 @@ namespace mDNSResolver {
     return INADDR_NONE;
   }
 
-  void Resolver::query(std::string& name) {
+  void Resolver::query(const char* name) {
     Query query(name);
     udp.beginPacketMulticast(MDNS_BROADCAST_IP, MDNS_PORT, localIP, UDP_TIMEOUT);
     query.sendPacket(udp);
