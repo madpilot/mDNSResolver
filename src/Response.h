@@ -1,6 +1,7 @@
 #ifndef MDNS_RESOLVER_RESPONSE_H
 #define MDNS_RESOLVER_RESPONSE_H
 
+#include "Constants.h"
 #include <IPAddress.h>
 
 namespace mDNSResolver {
@@ -13,7 +14,7 @@ namespace mDNSResolver {
 
     void decrementTTL();
 
-    const char* name;
+    char name[MDNS_MAX_NAME_LEN + 1];
     long ttl;
     bool resolved;
     IPAddress ipAddress;

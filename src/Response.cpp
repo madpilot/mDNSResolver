@@ -1,8 +1,11 @@
 #include "Response.h"
+#ifdef TEST
+#include <stdlib.h>
+#endif
 
 namespace mDNSResolver {
   Response::Response() {
-    this->name = "";
+    this->name[0] = '\0';
     this->resolved = false;
     this->ttl = 0;
     this->cname = NULL;
@@ -10,7 +13,8 @@ namespace mDNSResolver {
   }
 
   Response::Response(const char* name) {
-    this->name = name;
+    strncpy(this->name, name, MDNS_MAX_NAME_LEN + 1);
+    this->name[MDNS_MAX_NAME_LEN + 1] = '\0';
     this->ttl = 0;
     this->resolved = false;
     this->cname = NULL;
@@ -18,7 +22,8 @@ namespace mDNSResolver {
   }
 
   Response::Response(const char* name, unsigned long ttl) {
-    this->name = name;
+    strncpy(this->name, name, MDNS_MAX_NAME_LEN + 1);
+    this->name[MDNS_MAX_NAME_LEN + 1] = '\0';
     this->ttl = ttl;
     this->resolved = false;
     this->ipAddress = INADDR_NONE;
