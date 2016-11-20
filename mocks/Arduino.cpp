@@ -12,3 +12,6 @@ void set_millis(millis_t t) {
   mocked = t;
 }
 
+millis_t get_millis(void) {
+  return mocked;
+}
