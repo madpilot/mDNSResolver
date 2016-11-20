@@ -15,14 +15,14 @@ My home automation projects don't need discovery - I just wanted to be able to e
 
 Clone this code in to your [Arduino directory](https://www.arduino.cc/en/Guide/Libraries#toc5).
 
-```
+```bash
 cd ~/Arduino
 git clone git@github.com:madpilot/mDNSResolver.git
 ```
 
 Restart your IDE. You can now include
 
-```
+```cpp
 #include <mDNSResolver.h>
 ```
 
@@ -30,23 +30,23 @@ in your sketch.
 
 # Usage
 
-```
+```cpp
 IPAddress ip = resolver.search("test.local");
 ```
 
 Returns INADDR_NONE if the name can't be found.
 
-See the examples folder for the full setup details
+See the [examples folder](https://github.com/madpilot/mDNSResolver/tree/master/examples) for the full setup details
 
 # Advanced Customisation
 
 You can change a few settings by defining some constants before including the mDNSResolver header file, but only if you really know what you are doing
 
-```
-#define MDNS_RETRY        1000			# Number of milliseconds between rebroadcasting a name query
-#define MDNS_ATTEMPTS     5					# Number of times to try a resolving before giving up
-#define UDP_TIMEOUT       255				# Amount of time (in milliseconds) before giving up on the UDP packet
-#define MDNS_TLD 					".local"  # Top-level domain to search for. This can technically be anything, but pretty much everyone says leave it as .local
+```cpp
+#define MDNS_RETRY    1000      # Number of milliseconds between rebroadcasting a name query
+#define MDNS_ATTEMPTS 5         # Number of times to try a resolving before giving up
+#define UDP_TIMEOUT   255       # Amount of time (in milliseconds) before giving up on the UDP packet
+#define MDNS_TLD      ".local"  # Top-level domain to search for. This can technically be anything, but pretty much everyone says leave it as .local
 
 #include <mDNSResolver.h>
 ```
@@ -57,7 +57,7 @@ The library has a suite of specs, which you can run on any machine that supports
 
 The specs are written using [Catch](https://github.com/philsquared/Catch), written in BDD style.
 
-```
+```bash
 make test
 ```
 
@@ -71,7 +71,7 @@ Feature branches with lots of small commits (especially titled "oops", "fix typo
 
 # License
 
-See LICENSE.txt
+See [LICENSE.txt](https://github.com/madpilot/mDNSResolver/tree/master/LICENSE.txt)
 
 # Credits
 
