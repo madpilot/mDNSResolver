@@ -7,6 +7,7 @@
 
 #include <WiFiUdp.h>
 #include <IPAddress.h>
+#include <Arduino.h>
 
 using namespace mDNSResolver;
 
@@ -52,18 +53,37 @@ SCENARIO("resolving an mDNS name") {
     }
 
     GIVEN("a name that does not exist") {
+      set_millis(0);
       IPAddress result = resolver.search("test.local");
 
       THEN("search should return false") {
         REQUIRE(result == INADDR_NONE);
       }
+
+      THEN("it should return after the timeout") {
+        REQUIRE(get_millis() >= 5000);
+      }
     }
 
     GIVEN("a name that does exist") {
+      set_millis(0);
       IPAddress result = resolver.search("mqtt.local");
 
       THEN("search should return true") {
         REQUIRE(result == IPAddress(192, 168, 1, 2));
+      }
+    }
+
+    GIVEN("a name that is not a .local domain") {
+      set_millis(0);
+      IPAddress result = resolver.search("test.com");
+
+      THEN("search should return false") {
+        REQUIRE(result == INADDR_NONE);
+      }
+
+      THEN("it should return without waiting for the timeout") {
+        REQUIRE(get_millis() == 0);
       }
     }
   }

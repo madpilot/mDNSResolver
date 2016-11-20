@@ -23,6 +23,10 @@
 #define UDP_TIMEOUT       255
 #endif
 
+#ifndef MDNS_TLD
+#define MDNS_TLD ".local"
+#endif
+
 namespace mDNSResolver {
   class Resolver {
     public:
@@ -40,6 +44,7 @@ namespace mDNSResolver {
       bool init;
       long timeout;
       void query(const char* name);
+      bool isMDNSName(const char* name);
   };
 };
 #endif
