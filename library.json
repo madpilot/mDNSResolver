@@ -1,6 +1,6 @@
 {
     "name": "mDNSResolver",
-    "keywords": "ethernet, iot, mdns, bonjour",
+    "keywords": "ethernet, iot, mdns, bonjour, esp8266",
     "description": "A library that resolve mDNS name",
     "repository": {
         "type": "git",
@@ -11,7 +11,6 @@
     "examples": "examples/*/*.ino",
     "frameworks": "arduino",
     "platforms": [
-        "atmelavr",
         "espressif"
     ]
 }
