@@ -9,7 +9,7 @@ An Arduino library that resolves mDNS (bonjour) names. It doesn't do any discove
 
 ## Why?
 
-My home automation projects don't need discovery - I just wanted to be able to enter the name of my MQTT server when configuring my devices. There are other libraries out there that do discovery of services, but they didn't do name resolution easier - as a result they included more code than I needed.
+My home automation projects don't need discovery - I just wanted to be able to enter the name of my MQTT server when configuring my devices. There are other libraries out there that do discovery of services, but they didn't do name resolution easy - And they introduced more code than I needed.
 
 # Installation
 
