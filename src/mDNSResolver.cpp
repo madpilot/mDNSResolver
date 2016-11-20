@@ -49,7 +49,7 @@ namespace mDNSResolver {
         attempts++;
       }
 
-      MDNS_RESULT result = loop();
+      MDNS_RESULT result = read();
       if(result != E_MDNS_OK) {
         return INADDR_NONE;
       }
@@ -65,7 +65,17 @@ namespace mDNSResolver {
     udp.endPacket();
   }
 
-  MDNS_RESULT Resolver::loop() {
+  void Resolver::loop() {
+    // Clear the buffers out.
+    unsigned int len = udp.parsePacket();
+    unsigned char *buffer = (unsigned char *)malloc(sizeof(unsigned char) * len);
+    if(buffer != NULL) {
+      udp.read(buffer, len);
+      free(buffer);
+    }
+  }
+
+  MDNS_RESULT Resolver::read() {
     cache.expire();
 
     if(!init) {
@@ -74,6 +84,7 @@ namespace mDNSResolver {
     }
 
     unsigned int len = udp.parsePacket();
+
     if(len > 0) {
       unsigned char *buffer = (unsigned char *)malloc(sizeof(unsigned char) * len);
 
@@ -85,9 +96,11 @@ namespace mDNSResolver {
 
       udp.read(buffer, len);
       lastResult = Answer::process(buffer, len, cache);
+
       free(buffer);
       return lastResult;
     }
+
     return E_MDNS_OK;
   }
 };

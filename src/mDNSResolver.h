@@ -32,10 +32,11 @@ namespace mDNSResolver {
 			void setLocalIP(IPAddress localIP);
       IPAddress search(const char* name);
       MDNS_RESULT lastResult;
+      void loop();
     private:
       WiFiUDP udp;
       IPAddress localIP;
-      MDNS_RESULT loop();
+      MDNS_RESULT read();
       bool init;
       long timeout;
       void query(const char* name);
