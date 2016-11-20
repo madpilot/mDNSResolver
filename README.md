@@ -1,4 +1,4 @@
-# mDNS Resolver
+# mDNS Resolver [![Build Status](https://travis-ci.org/madpilot/mDNSResolver.svg?branch=master)](https://travis-ci.org/madpilot/mDNSResolver)
 
 An Arduino library that resolves mDNS (bonjour) names. It doesn't do any discovery, it just resolves names.
 
@@ -10,8 +10,6 @@ An Arduino library that resolves mDNS (bonjour) names. It doesn't do any discove
 ## Why?
 
 My home automation projects don't need discovery - I just wanted to be able to enter the name of my MQTT server when configuring my devices. There are other libraries out there that do discovery of services, but they didn't do name resolution easier - as a result they included more code than I needed.
-
-[![Build Status](https://travis-ci.org/madpilot/mDNSResolver.svg?branch=master)](https://travis-ci.org/madpilot/mDNSResolver)
 
 # Installation
 
