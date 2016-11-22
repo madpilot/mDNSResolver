@@ -17,7 +17,7 @@ void setup() {
   int WiFiCounter = 0;
   // We start by connecting to a WiFi network
   Serial.println("Connecting to ");
-  Serial.println("Burntos");
+  Serial.println(WIFI_AP);
 
   WiFi.disconnect();
   WiFi.mode(WIFI_STA);
@@ -33,7 +33,6 @@ void setup() {
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 
-  // put your setup code here, to run once:
   Serial.print("Resolving ");
   Serial.println(NAME_TO_RESOLVE);
 
