@@ -2,8 +2,8 @@
 #include <WiFiUdp.h>
 #include <mDNSResolver.h>
 
-#define WIFI_AP 	"my-wifi-ap"
-#define WIFI_PASS "my-wifi-pass"
+#define WIFI_AP         "my-wifi-ap"
+#define WIFI_PASS       "my-wifi-pass"
 #define NAME_TO_RESOLVE "test.local"
 
 using namespace mDNSResolver;
