@@ -35,9 +35,10 @@ void setup() {
 
   // put your setup code here, to run once:
   Serial.print("Resolving ");
-	Serial.println(NAME_TO_RESOLVE);
+  Serial.println(NAME_TO_RESOLVE);
 
-	resolver.setLocalIP(WiFi.localIP());
+  resolver.setLocalIP(WiFi.localIP());
+  
   IPAddress ip = resolver.search(NAME_TO_RESOLVE);
   if(ip != INADDR_NONE) {
     Serial.print("Resolved: ");
@@ -48,6 +49,6 @@ void setup() {
 }
 
 void loop() {
-	// Required to clear the UDP buffer, as we can't unjoin a multicast group yet
-	resolver.loop();
+  // Required to clear the UDP buffer, as we can't unjoin a multicast group yet
+  resolver.loop();
 }
