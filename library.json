@@ -6,7 +6,7 @@
         "type": "git",
         "url": "https://github.com/madpilot/mDNSResolver.git"
     },
-    "version": "0.1",
+    "version": "0.2",
     "exclude": "tests,fixtures,mocks",
     "examples": "examples/*/*.ino",
     "frameworks": "arduino",
