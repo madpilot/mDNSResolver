@@ -64,7 +64,13 @@ namespace mDNSResolver {
 
   void Resolver::query(const char* name) {
     Query query(name);
-    udp.beginPacketMulticast(MDNS_BROADCAST_IP, MDNS_PORT, localIP, UDP_TIMEOUT);
+    
+#if defined(ESP32)
+	udp.beginMulticast(MDNS_BROADCAST_IP, MDNS_PORT);
+	udp.beginMulticastPacket();
+#else
+	udp.beginPacketMulticast(MDNS_BROADCAST_IP, MDNS_PORT, localIP, UDP_TIMEOUT);
+#endif
     query.sendPacket(udp);
     udp.endPacket();
   }
@@ -86,7 +92,11 @@ namespace mDNSResolver {
 
     if(!init) {
       init = true;
-      udp.beginMulticast(localIP, MDNS_BROADCAST_IP, MDNS_PORT);
+#if defined(ESP32)
+	udp.beginMulticast(MDNS_BROADCAST_IP, MDNS_PORT);
+#else
+	udp.beginMulticast(localIP, MDNS_BROADCAST_IP, MDNS_PORT);
+#endif
     }
 
     unsigned int len = udp.parsePacket();
