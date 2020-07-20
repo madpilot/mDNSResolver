@@ -1,4 +1,9 @@
+#if defined(ESP32)
+#include <WiFi.h>
+#else
 #include <ESP8266WiFi.h>
+#endif
+
 #include <WiFiUdp.h>
 #include <mDNSResolver.h>
 
