@@ -2,7 +2,13 @@
 #define MDNS_RESOLVER_RESPONSE_H
 
 #include "Constants.h"
+
+#ifdef ARDUINO_ARCH_RP2040
+#include <WiFi.h>
+#else
 #include <IPAddress.h>
+#endif
+
 
 namespace mDNSResolver {
   class Response {

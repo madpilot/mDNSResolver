@@ -1,6 +1,6 @@
 {
     "name": "mDNSResolver",
-    "keywords": "ethernet, iot, mdns, bonjour, esp8266, esp32",
+    "keywords": "ethernet, iot, mdns, bonjour, esp8266, esp32, rp2040",
     "description": "A library that resolve mDNS name",
     "repository": {
         "type": "git",
@@ -12,6 +12,7 @@
     "frameworks": "arduino",
     "platforms": [
         "espressif8266",
-        "espressif32"
+        "espressif32",
+        "rp2040"
     ]
 }
