@@ -1,7 +1,12 @@
 #ifndef MDNS_RESOLVER_h
 #define MDNS_RESOLVER_h
 
+#ifdef ARDUINO_ARCH_RP2040
+#include <WiFi.h>
+#else
 #include <IPAddress.h>
+#endif
+
 #include <WiFiUdp.h>
 #include "Cache.h"
 #include "Query.h"
